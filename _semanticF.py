@@ -103,10 +103,11 @@ def load_csv(category, year, type='wlp', drop_na=True):
         df = df.dropna()
     return df
 
-def load_lexicon():
+def load_lexicon(drop_na=True):
     path = _BASE_DIR + '\\Lexicon\\lexicon.csv'
     lex = pd.read_csv(path, sep='\t')
-    # lex['y'] = lex.apply(lambda row: 'y_stop' if row['y']=='y' and row['lemma']=='.' else row['y'], axis=1)
+    if drop_na:
+        lex = lex.dropna()
     return lex
 
 def set_y_stop(df, standard_col='standard', y_col='y', stop_tag=_STOP_TAG):
