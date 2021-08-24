@@ -4,8 +4,8 @@ import re
 import csv
 import glob
 import zipfile
-import _paths as _PATHS
 import pandas as pd
+from . import _paths as _PATHS
 
 # COCA - directories - !!!! da aggiustare con le proprie !!!!
 _BASE_DIR = _PATHS._BASE_DIR # 'C:\\Users\\tommaso\\Documents\\_Bicocca\\Magistrale\\Data Semantics\\SemanticCities\\'
