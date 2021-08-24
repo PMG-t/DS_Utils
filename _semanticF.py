@@ -4,11 +4,12 @@ import re
 import csv
 import glob
 import zipfile
+import _paths as _PATHS
 import pandas as pd
 
 # COCA - directories - !!!! da aggiustare con le proprie !!!!
-_BASE_DIR = 'C:\\Users\\tommaso\\Documents\\_Bicocca\\Magistrale\\Data Semantics\\SemanticCities\\'
-_COCA_PATH = 'C:\\COCA.zip'
+_BASE_DIR = _PATHS._BASE_DIR # 'C:\\Users\\tommaso\\Documents\\_Bicocca\\Magistrale\\Data Semantics\\SemanticCities\\'
+_COCA_PATH = _PATHS._COCA_PATH # 'C:\\COCA.zip'
 # CORPUS CATEGORIES
 _COCA_CATEGORIES = ['Academic', 'Blogs', 'Fiction', 'Magazine', 'Movies', 'Newspaper', 'Spoken']
 _DICT_CATEGORIES = {
