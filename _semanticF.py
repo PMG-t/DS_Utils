@@ -5,12 +5,15 @@ import csv
 import glob
 import zipfile
 import pandas as pd
+from termcolor import colored
 from gensim.models import Word2Vec
 from . import _paths as _PATHS
 
-# COCA - directories - !!!! da aggiustare con le proprie !!!!
-_BASE_DIR = _PATHS._BASE_DIR # 'C:\\Users\\tommaso\\Documents\\_Bicocca\\Magistrale\\Data Semantics\\SemanticCities\\'
-_COCA_PATH = _PATHS._COCA_PATH # 'C:\\COCA.zip'
+# THIS MODULE NAME
+_MODULE_NAME = '_semanticF'
+# DIRECTORIES - PROJECT FOLDER and COCA ARCHIVE
+_BASE_DIR = _PATHS._BASE_DIR
+_COCA_PATH = _PATHS._COCA_PATH
 # CORPUS CATEGORIES
 _COCA_CATEGORIES = ['Academic', 'Blogs', 'Fiction', 'Magazine', 'Movies', 'Newspaper', 'Spoken']
 _DICT_CATEGORIES = {
@@ -22,14 +25,13 @@ _DICT_CATEGORIES = {
     'Newspaper': 'news',
     'Spoken': 'spok'
 }
-# HEADER GENERALI DEI FILE
+# HEADER GENERALI DEI DATAFRAME
 _WLP_HEADER = ['original', 'standard', 'y']
 # Y-TAG VARI
 _STOP_TAG = 'y_stop'
 _LEMMA_TAG = '^n|^jj|^v|^r'
 _NEGATION_TAG = '^xx'
 _SYMBOLS_TAG = ['y','ge']
-
 
 #------------------------------------------------------------------------------#
 
@@ -62,6 +64,19 @@ class Utils:
     def read_inzip_file(self, archive, file):
         with archive.open(file) as f:
             return f.read()
+
+    def throw_msg(self, category, message, from_function):
+        category_colour = {
+            'done':'blue',
+            'success':'green',
+            'warn':'yellow',
+            'error':'red'
+        }
+        if category.lower() in category_colour:
+            full_message = category.upper() + ' → ' + _MODULE_NAME + ' in ' + from_function + '() → ' + message
+            print(colored(full_message, category_colour[category.lower()]))
+        else:
+            print(throw_msg('error', 'message category muste be in ' + ', '.join(list(category_colour.keys())), throw_msg.__name__))
 
 #------------------------------------------------------------------------------#
 
@@ -130,35 +145,46 @@ def first_y(y):
         return ''
 
 def lemmatize_df(df, lemma_col='first_y', tag=_LEMMA_TAG):
+    if (lemma_col=='first_y') and (lemma_col not in list(df.columns)):
+        df = first_y_df(df)
+        df = set_y_stop(df, y_col=['y', 'first_y'])
     return select(df.dropna(), {lemma_col:['re', tag+'|y_stop']})
 
 def del_symbols_df(df, lemma_col='first_y', tag=_SYMBOLS_TAG):
     tag = [tag] if type(tag) is str else tag
+    if (lemma_col=='first_y') and (lemma_col not in list(df.columns)):
+        df = first_y_df(df)
+        df = set_y_stop(df, y_col=['y', 'first_y'])
     return select(df.dropna(), {lemma_col:['!']+tag})
 
-def texts_to_sentences(texts):
-    total = []
-    for text in texts:
-        lines = [l.split('\t') for l in text.split('\n')]
-        standardized = [x[2] for x in lines if len(x) > 2] # prende solo seconda colonna dal file
-        new_text = ' '.join(standardized) # rimette tutto in formato testuale
-        sentences = [beautify(x.split()) for x in new_text.split('.')] # divide frasi e le sistema
-        total += sentences
-    return total
+def preprocess_df(df, preprocess='lemmatize', process_col='first_y'):
+    if preprocess=='symbols':
+        return del_symbols_df(df, lemma_col=process_col)
+    elif preprocess=='lemmatize':
+        return lemmatize_df(df, lemma_col=process_col)
+    else:
+        print('_semanticF: preprocess_df(): preprocess tecnique must be \'lemmatizie\' or \'symbols\']')
 
-def get_sentences(df, sentence_col='standard', sep='.'):
-    text = ' '.join(list(df[sentence_col]))
-    sentences = [sentence.split() for sentence in text.split(' . ')]
+def get_sentences(dfs, sentence_col='standard', sep='.', preprocess=None):
+    sentences = []
+    dfs = [dfs] if type(dfs) is not list else dfs
+    if preprocess:
+        print('starting df preprocess ...')
+        dfs = [preprocess_df(df, preprocess) for df in dfs]
+    for df in dfs:
+        text = ' '.join(list(df[sentence_col]))
+        sentences = sentences + [sentence.split() for sentence in text.split(' . ')]
     return sentences
 
-def word2vec(sentences, min_count=5, vector_size=300, model='CBOW'):
+def w2v_df(dfs, sentence_col='standard', sep='.', preprocess=None, min_count=5, vector_size=300, model='SG'):
+    print('getting sentences ...')
+    sentences = get_sentences(dfs, sentence_col=sentence_col, sep=sep, preprocess=preprocess)
+    print('building model ...')
+    return w2v(sentences, min_count=min_count, vector_size=vector_size, model=model)
+
+def w2v(sentences, min_count=5, vector_size=300, model='SG'):
     model = 0 if model=='CBOW' else 1
     return Word2Vec(sentences, min_count=min_count, vector_size=vector_size, sg=model)
-
-# non usata
-def beautify(text):
-    stoplist = {'', '.', ',', ';', ':', '...', '<p>', '\"', '\'', '-'}
-    return [word.lower() for word in text if word not in stoplist]
 
 def n_select(df, col, n_val):
     dfout = df.copy()
@@ -184,7 +210,7 @@ def n_select(df, col, n_val):
         elif op == '!in':
             dfout = dfout.loc[~((dfout[col] >= n_val[0]) & (dfout[col] <= n_val[1]))].copy()
         else:
-            print('_energyF: n_select() from big_select(): operation' + op + 'not valid')
+            print('_semanticF: n_select() from big_select(): operation' + op + 'not valid')
     else:
         dfout = dfout.loc[dfout[col].isin(n_val)].copy()
     return dfout
