@@ -1,3 +1,6 @@
+# Personal project paths
+_paths.py
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
