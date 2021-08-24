@@ -5,6 +5,7 @@ import csv
 import glob
 import zipfile
 import pandas as pd
+from gensim.models import Word2Vec
 from . import _paths as _PATHS
 
 # COCA - directories - !!!! da aggiustare con le proprie !!!!
@@ -25,7 +26,7 @@ _DICT_CATEGORIES = {
 _WLP_HEADER = ['original', 'standard', 'y']
 # Y-TAG VARI
 _STOP_TAG = 'y_stop'
-_LEMMA_TAG = '^nn|^jj|^v|^r'
+_LEMMA_TAG = '^n|^jj|^v|^r'
 _NEGATION_TAG = '^xx'
 _SYMBOLS_TAG = ['y','ge']
 
@@ -145,6 +146,16 @@ def texts_to_sentences(texts):
         total += sentences
     return total
 
+def get_sentences(df, sentence_col='standard', sep='.'):
+    text = ' '.join(list(df[sentence_col]))
+    sentences = [sentence.split() for sentence in text.split(' . ')]
+    return sentences
+
+def word2vec(sentences, min_count=5, vector_size=300, model='CBOW'):
+    model = 0 if model=='CBOW' else 1
+    return Word2Vec(sentences, min_count=min_count, vector_size=vector_size, sg=model)
+
+# non usata
 def beautify(text):
     stoplist = {'', '.', ',', ';', ':', '...', '<p>', '\"', '\'', '-'}
     return [word.lower() for word in text if word not in stoplist]
