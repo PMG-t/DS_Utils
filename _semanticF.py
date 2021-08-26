@@ -179,12 +179,14 @@ def get_sentences(dfs, sentence_col='standard', sep='.', preprocess=None):
 def w2v_df(dfs, sentence_col='standard', sep='.', preprocess=None, min_count=5, vector_size=300, model='SG'):
     print('getting sentences ...')
     sentences = get_sentences(dfs, sentence_col=sentence_col, sep=sep, preprocess=preprocess)
-    print('building model ...')
     return w2v(sentences, min_count=min_count, vector_size=vector_size, model=model)
 
 def w2v(sentences, min_count=5, vector_size=300, model='SG'):
     model = 0 if model=='CBOW' else 1
-    return Word2Vec(sentences, min_count=min_count, vector_size=vector_size, sg=model)
+    print('building model ...')
+    w2v_model = Word2Vec(sentences, min_count=min_count, vector_size=vector_size, sg=model)
+    print('model completed ...')
+    return w2v_model
 
 def n_select(df, col, n_val):
     dfout = df.copy()
