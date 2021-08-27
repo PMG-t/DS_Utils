@@ -1,8 +1,12 @@
+# Git repository link
+# https://github.com/PimpMyGit/DS_Utils
+
 import os
 import io
 import re
 import csv
 import glob
+import pickle
 import zipfile
 import pandas as pd
 from termcolor import colored
@@ -64,6 +68,27 @@ class Utils:
     def read_inzip_file(self, archive, file):
         with archive.open(file) as f:
             return f.read()
+
+    def pickle_save(self, filename, object, subfolder='models'):
+        path = ''
+        if '\\' in filename:
+            path = filename
+        else:
+            if not os.path.exists(_BASE_DIR + '\\' + subfolder + '\\'):
+                os.mkdir(_BASE_DIR + '\\' + subfolder + '\\')
+            path = _BASE_DIR + '\\' + subfolder + '\\' + filename
+        file = open(path + '.pkl', 'wb')
+        pickle.dump(object, file)
+        file.close()
+        self.throw_msg('done', 'object saved in ' + path, 'pickle_save')
+
+
+    def pickle_load(self, filename, subfolder='models'):
+        path = filename if '\\' in filename else _BASE_DIR + '\\' + subfolder + '\\' + filename
+        file = open(path + '.pkl', 'rb')
+        object = pickle.load(file)
+        file.close()
+        return object
 
     def throw_msg(self, category, message, from_function):
         category_colour = {
@@ -176,10 +201,19 @@ def get_sentences(dfs, sentence_col='standard', sep='.', preprocess=None):
         sentences = sentences + [sentence.split() for sentence in text.split(' . ')]
     return sentences
 
-def w2v_df(dfs, sentence_col='standard', sep='.', preprocess=None, min_count=5, vector_size=300, model='SG'):
+def load_model():
+    pass
+
+def save_model():
+    pass
+
+def w2v_df(dfs, sentence_col='standard', sep='.', preprocess=None, min_count=5, vector_size=300, model='SG', model_filename=None):
     print('getting sentences ...')
     sentences = get_sentences(dfs, sentence_col=sentence_col, sep=sep, preprocess=preprocess)
-    return w2v(sentences, min_count=min_count, vector_size=vector_size, model=model)
+    w2v_model = w2v(sentences, min_count=min_count, vector_size=vector_size, model=model)
+    if save_model:
+        U.pickle_save(model_filename, w2v_model)
+    return w2v_model
 
 def w2v(sentences, min_count=5, vector_size=300, model='SG'):
     model = 0 if model=='CBOW' else 1
