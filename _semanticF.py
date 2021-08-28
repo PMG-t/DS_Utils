@@ -11,6 +11,7 @@ import zipfile
 import pandas as pd
 from termcolor import colored
 from gensim.models import Word2Vec
+from gensim.models.phrases import Phrases, Phraser
 from . import _paths as _PATHS
 
 # THIS MODULE NAME
@@ -188,7 +189,7 @@ def preprocess_df(df, preprocess='lemmatize', process_col='first_y'):
     elif preprocess=='lemmatize':
         return lemmatize_df(df, lemma_col=process_col)
     else:
-        print('_semanticF: preprocess_df(): preprocess tecnique must be \'lemmatizie\' or \'symbols\']')
+        print('_semanticF: preprocess_df(): preprocess tecnique must be \'lemmatize\' or \'symbols\']')
 
 def get_sentences(dfs, sentence_col='standard', sep='.', preprocess=None):
     sentences = []
@@ -198,8 +199,13 @@ def get_sentences(dfs, sentence_col='standard', sep='.', preprocess=None):
         dfs = [preprocess_df(df, preprocess) for df in dfs]
     for df in dfs:
         text = ' '.join(list(df[sentence_col]))
-        sentences = sentences + [sentence.split() for sentence in text.split(' . ')]
+        sentences = sentences + [[word.replace('-', '_') for word in sentence.split()] for sentence in text.split(' . ')]
     return sentences
+
+def generate_bi_grams(sentences, **kwargs):
+    phrases = Phrases(sentences, **kwargs)
+    phrases_model = Phraser(phrases)
+    return [phrases_model[sent] for sent in sentences]
 
 def load_model():
     pass
@@ -207,10 +213,21 @@ def load_model():
 def save_model():
     pass
 
-def w2v_df(dfs, sentence_col='standard', sep='.', preprocess=None, min_count=5, vector_size=300, model='SG', model_filename=None):
+def w2v_df(dfs, sentence_col='standard', sep='.', 
+    preprocess=None, min_count=5, vector_size=300, 
+    model='SG', model_filename='default_model'):
     print('getting sentences ...')
     sentences = get_sentences(dfs, sentence_col=sentence_col, sep=sep, preprocess=preprocess)
-    w2v_model = w2v(sentences, min_count=min_count, vector_size=vector_size, model=model)
+    print('done sentences!')
+    print('getting bi-grams ...')
+    bi_gram_sentences = generate_bi_grams(sentences, 
+                                        min_count=5,
+                                        threshold=7, 
+                                        progress_per=1000,
+                                        #scoring='npmi'
+                                        )
+    print('done bi-grams!')
+    w2v_model = w2v(bi_gram_sentences, min_count=min_count, vector_size=vector_size, model=model)
     if save_model:
         U.pickle_save(model_filename, w2v_model)
     return w2v_model
