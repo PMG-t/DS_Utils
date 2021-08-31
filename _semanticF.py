@@ -4,11 +4,14 @@
 import os
 import io
 import re
-import csv
+import math
 import glob
+import scipy
 import pickle
 import zipfile
+import numpy as np
 import pandas as pd
+import seaborn as sns
 from termcolor import colored
 from gensim.models import Word2Vec
 from . import _paths as _PATHS
@@ -29,6 +32,11 @@ _DICT_CATEGORIES = {
     'Newspaper': 'news',
     'Spoken': 'spok'
 }
+# LEXICON
+# _LEX = load_lexicon()
+f = open('grosso_SG_lemmatize.pkl', 'rb')
+_MODEL = pickle.load(f)
+f.close()
 # HEADER GENERALI DEI DATAFRAME
 _WLP_HEADER = ['original', 'standard', 'y']
 # Y-TAG VARI
@@ -36,6 +44,9 @@ _STOP_TAG = 'y_stop'
 _LEMMA_TAG = '^n|^jj|^v|^r'
 _NEGATION_TAG = '^xx'
 _SYMBOLS_TAG = ['y','ge']
+# SEABORN
+_SNS_FIG_SIZE=_fig_size = (10,10)
+sns.set(rc={'figure.figsize':_SNS_FIG_SIZE})
 
 #------------------------------------------------------------------------------#
 
@@ -138,6 +149,19 @@ def wlp_to_csv(filename, wlp_content, do_format=True, write_csv=True):
         df.to_csv(_BASE_DIR+filename+'.csv', sep='\t', index=False)
     return df
 
+def massivo_csv(type='wlp'):
+    tutti = []
+    for category in list(_DICT_CATEGORIES.keys()):
+        if category=='Blogs':
+            for n in range(1,35):
+                tutti.append(_BASE_DIR + '\\' + category + '\\' + type + '_' + _DICT_CATEGORIES[category.capitalize()] + '_' + str(n).zfill(2) + '.csv')
+        else:
+            for year in range(1990,2020):
+                tutti.append(_BASE_DIR + '\\' + category + '\\' + type + '_' + _DICT_CATEGORIES[category.capitalize()] + '_' + str(year) + '.csv')
+    return tutti
+
+
+
 def load_csv(category, year, type='wlp', drop_na=True):
     path = _BASE_DIR + '\\' + category + '\\' + type + '_' + _DICT_CATEGORIES[category.capitalize()] + '_' + str(year) + '.csv'
     df = pd.read_csv(path, sep='\t')
@@ -221,6 +245,42 @@ def w2v(sentences, min_count=5, vector_size=300, model='SG'):
     w2v_model = Word2Vec(sentences, min_count=min_count, vector_size=vector_size, sg=model)
     print('model completed ...')
     return w2v_model
+
+def wsum(w1, w2, model=_MODEL):
+    w1 = model.wv[w1] if type(w1) is str else w1
+    w2 = model.wv[w2] if type(w2) is str else w2
+    return w1 + w1
+
+def wnorm(w, model=_MODEL):
+    vec = model.wv[w] if type(w) is str else w
+    return math.sqrt(sum([math.pow(v,2) for v in vec]))
+
+def wsim(pos, neg=[], topn=10, thresh=0, comp=-1, model=_MODEL):
+    sim = list(model.wv.most_similar(positive=pos, negative=neg, topn=topn))
+    simt = []
+    for s in sim:
+        if s[1]>thresh:
+            simt.append(s[0] if comp==0 else s[1] if comp==1 else s)
+    return simt
+
+def wdist(w1, w2, model=_MODEL):
+    w1 = model.wv[w1] if type(w1) is str else w1
+    w2 = model.wv[w2] if type(w2) is str else w2
+    return 1-scipy.spatial.distance.cosine(w1, w2)
+
+def dist_matrix(words1, words2=[], print=True, fig_size=_SNS_FIG_SIZE, model=_MODEL):
+    matrix=[]
+    words2 = words2 if len(words2)>0 else words1
+    for w1 in words1:
+        row = []
+        for w2 in words2:
+            row.append(wdist(model,w1,w2))
+        matrix.append(row)
+    if print:
+        _fig_size = (10,10)
+        sns.set(rc={'figure.figsize': fig_size })
+        mat=sns.heatmap(np.array(matrix))
+    return matrix
 
 def n_select(df, col, n_val):
     dfout = df.copy()
