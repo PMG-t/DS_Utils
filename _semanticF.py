@@ -49,7 +49,7 @@ def load_lexicon(drop_na=True):
     return lex
 _LEXICON = load_lexicon()
 # W2V MODEL
-_MODEL = pickle.load(open(_MODEL_PATH, 'rb'))
+_MODEL = pickle.load(open(_MODEL_PATH, 'rb')) # .close ?
 # HEADER GENERALI DEI DATAFRAME
 _WLP_HEADER = ['original', 'standard', 'y']
 # Y-TAG VARI
@@ -178,12 +178,6 @@ def massivo_csv(type='wlp'):
                 tutti.append(_BASE_DIR + '\\' + category + '\\' + type + '_' + _DICT_CATEGORIES[category.capitalize()] + '_' + str(year) + '.csv')
     return tutti
 
-# def load_lexicon(drop_na=True):
-#     path = _LEXICON_PATH
-#     lex = pd.read_csv(path, sep='\t')
-#     if drop_na:
-#         lex = lex.dropna()
-#     return lex
 
 def load_csv(category, year, type='wlp', drop_na=True):
     path = _BASE_DIR + '\\' + category + '\\' + type + '_' + _DICT_CATEGORIES[category.capitalize()] + '_' + str(year) + '.csv'
