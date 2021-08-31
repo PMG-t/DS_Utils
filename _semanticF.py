@@ -35,7 +35,7 @@ _DICT_CATEGORIES = {
 }
 # LEXICON
 # _LEX = load_lexicon()
-f = open('grosso_SG_lemmatize.pkl', 'rb')
+f = open(_PATHS._MODEL_PATH, 'rb')
 _MODEL = pickle.load(f)
 f.close()
 # HEADER GENERALI DEI DATAFRAME
@@ -237,16 +237,16 @@ def load_model():
 def save_model():
     pass
 
-def w2v_df(dfs, sentence_col='standard', sep='.', 
-    preprocess=None, min_count=5, vector_size=300, 
+def w2v_df(dfs, sentence_col='standard', sep='.',
+    preprocess=None, min_count=5, vector_size=300,
     model='SG', model_filename='default_model'):
     print('getting sentences ...')
     sentences = get_sentences(dfs, sentence_col=sentence_col, sep=sep, preprocess=preprocess)
     print('done sentences!')
     print('getting bi-grams ...')
-    bi_gram_sentences = generate_bi_grams(sentences, 
+    bi_gram_sentences = generate_bi_grams(sentences,
                                         min_count=5,
-                                        threshold=7, 
+                                        threshold=7,
                                         progress_per=1000,
                                         #scoring='npmi'
                                         )
