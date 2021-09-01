@@ -12,16 +12,23 @@ import zipfile
 import numpy as np
 import pandas as pd
 import seaborn as sns
+import matplotlib.pyplot as plt
+from fastcluster import linkage
 from termcolor import colored
 from gensim.models import Word2Vec
 from gensim.models.phrases import Phrases, Phraser
+from scipy.spatial.distance import pdist, squareform
 from . import _paths as _PATHS
+#%matplotlib inline
+
 
 # THIS MODULE NAME
 _MODULE_NAME = '_semanticF'
 # DIRECTORIES - PROJECT FOLDER and COCA ARCHIVE
 _BASE_DIR = _PATHS._BASE_DIR
 _COCA_PATH = _PATHS._COCA_PATH
+_MODEL_PATH = _BASE_DIR + 'grosso_SG_lemmatize.pkl'
+_LEXICON_PATH = _BASE_DIR + '\\Lexicon\\lexicon_lemmatize.csv'
 # CORPUS CATEGORIES
 _COCA_CATEGORIES = ['Academic', 'Blogs', 'Fiction', 'Magazine', 'Movies', 'Newspaper', 'Spoken']
 _DICT_CATEGORIES = {
@@ -34,10 +41,15 @@ _DICT_CATEGORIES = {
     'Spoken': 'spok'
 }
 # LEXICON
-# _LEX = load_lexicon()
-f = open(_PATHS._MODEL_PATH, 'rb')
-_MODEL = pickle.load(f)
-f.close()
+def load_lexicon(drop_na=True):
+    path = _LEXICON_PATH
+    lex = pd.read_csv(path, sep='\t')
+    if drop_na:
+        lex = lex.dropna()
+    return lex
+_LEXICON = load_lexicon()
+# W2V MODEL
+_MODEL = pickle.load(open(_MODEL_PATH, 'rb'))
 # HEADER GENERALI DEI DATAFRAME
 _WLP_HEADER = ['original', 'standard', 'y']
 # Y-TAG VARI
@@ -161,7 +173,12 @@ def massivo_csv(type='wlp'):
                 tutti.append(_BASE_DIR + '\\' + category + '\\' + type + '_' + _DICT_CATEGORIES[category.capitalize()] + '_' + str(year) + '.csv')
     return tutti
 
-
+# def load_lexicon(drop_na=True):
+#     path = _LEXICON_PATH
+#     lex = pd.read_csv(path, sep='\t')
+#     if drop_na:
+#         lex = lex.dropna()
+#     return lex
 
 def load_csv(category, year, type='wlp', drop_na=True):
     path = _BASE_DIR + '\\' + category + '\\' + type + '_' + _DICT_CATEGORIES[category.capitalize()] + '_' + str(year) + '.csv'
@@ -169,13 +186,6 @@ def load_csv(category, year, type='wlp', drop_na=True):
     if drop_na:
         df = df.dropna()
     return df
-
-def load_lexicon(drop_na=True):
-    path = _BASE_DIR + '\\Lexicon\\lexicon.csv'
-    lex = pd.read_csv(path, sep='\t')
-    if drop_na:
-        lex = lex.dropna()
-    return lex
 
 def set_y_stop(df, standard_col='standard', y_col='y', stop_tag=_STOP_TAG):
     y_cols = [y_col] if type(y_col) is str else y_col
@@ -263,6 +273,9 @@ def w2v(sentences, min_count=5, vector_size=300, model='SG'):
     print('model completed ...')
     return w2v_model
 
+def wvec(w, model=_MODEL):
+    return model.wv[w]
+
 def wsum(w1, w2, model=_MODEL):
     w1 = model.wv[w1] if type(w1) is str else w1
     w2 = model.wv[w2] if type(w2) is str else w2
@@ -272,32 +285,89 @@ def wnorm(w, model=_MODEL):
     vec = model.wv[w] if type(w) is str else w
     return math.sqrt(sum([math.pow(v,2) for v in vec]))
 
-def wsim(pos, neg=[], topn=10, thresh=0, comp=-1, model=_MODEL):
-    sim = list(model.wv.most_similar(positive=pos, negative=neg, topn=topn))
-    simt = []
-    for s in sim:
-        if s[1]>thresh:
-            simt.append(s[0] if comp==0 else s[1] if comp==1 else s)
-    return simt
+def wsim(pos, neg=[], topn=10, thresh=0, comp=-1, model=_MODEL, yfilter=None, fill=None):
+    fill = True if (thresh==0 and fill==None) else fill
+    sim0 = list(model.wv.most_similar(positive=pos, negative=neg, topn=(100000000 if fill else topn)))
+    sim1 = []
+    if yfilter != None:
+        for s in sim0:
+            filtered = len(list(select(_LEXICON, {'lemma':s[0], 'yl':yfilter})['lemma'])) == 0
+            if (not filtered) and ((s[1]>thresh) or (fill and len(sim1)<topn)):
+                sim1.append(s)
+            elif (fill and len(sim1)<topn):
+                pass
+            else:
+                break
+        sim0 = sim1
+        sim1 = []
+    elif thresh>0:
+        for s in sim0:
+            if s[1]>thresh or (fill and s[1]<=thresh and len(sim1)<topn):
+                sim1.append(s)
+        sim0 = sim1
+        sim1 = []
+
+    if comp != -1:
+        sim1 = [s[0] if comp==0 else s[1] for s in sim0]
+        sim0=sim1
+        sim1=[]
+    return sim0
 
 def wdist(w1, w2, model=_MODEL):
     w1 = model.wv[w1] if type(w1) is str else w1
     w2 = model.wv[w2] if type(w2) is str else w2
     return 1-scipy.spatial.distance.cosine(w1, w2)
 
-def dist_matrix(words1, words2=[], print=True, fig_size=_SNS_FIG_SIZE, model=_MODEL):
+def gety(w, model=_MODEL):
+    ys = list(select(_LEXICON, {'lemma':w})['yl'])
+    return max(set(ys), key=ys.count)
+
+def is_name(w, model=_MODEL):
+    return 'n'==gety(w, model)
+
+def is_adj(w, model=_MODEL):
+    return 'j'==gety(w, model)
+
+def is_verb(w, model=_MODEL):
+    return 'v'==gety(w, model)
+
+def is_adv(w, model=_MODEL):
+    return 'r'==gety(w, model)
+
+def dist_matrix(words1, words2=[], norm=True, show=True, fig_size=_SNS_FIG_SIZE, model=_MODEL):
     matrix=[]
     words2 = words2 if len(words2)>0 else words1
     for w1 in words1:
         row = []
         for w2 in words2:
-            row.append(wdist(model,w1,w2))
+            row.append(wdist(w1,w2,model=model))
         matrix.append(row)
-    if print:
+    if norm:
+        vlen = len(matrix[0])
+        flat_matrix = list(np.array(matrix).reshape(-1))
+        flat_matrix = normalize(flat_matrix)
+        matrix = list(np.array(flat_matrix).reshape(int(len(flat_matrix)/vlen),vlen))
+    if show:
         _fig_size = (10,10)
         sns.set(rc={'figure.figsize': fig_size })
         mat=sns.heatmap(np.array(matrix))
-    return matrix
+    return {'matrix': matrix, 'words': ((words1, words2) if words1 != words2 else words1)}
+
+def sort_dist_matrix(dist_matrix, method='complete', initial_values=[]):
+    if int(dist_matrix[0][0]) == 1:
+        dist_matrix = [[(1-v) for v in row] for row in dist_matrix]
+    if type(dist_matrix) is not np.array:
+        dist_matrix = np.array([np.array(row) for row in dist_matrix])
+    out = compute_serial_matrix(dist_matrix, method)
+    N=len(out['ordered_dist_mat'])
+    plt.pcolormesh(out['ordered_dist_mat'])
+    plt.colorbar()
+    plt.xlim([0,N])
+    plt.ylim([0,N])
+    plt.show()
+    if initial_values != []:
+        out['words'] = [initial_values[i] for i in out['res_order']]
+    return out
 
 def n_select(df, col, n_val):
     dfout = df.copy()
@@ -352,3 +422,80 @@ def select(df, cts={}):
         elif t == 'int64' or t == 'float64': # campo numerico
             dfout = n_select(dfout, ccol, cval).copy()
     return dfout
+
+def normalize(values , method='max-min'):
+    minv = min(values)
+    maxv = max(values)
+    if method=='max-min':
+        return [((v-minv) / (maxv-minv)) for v in values]
+
+def discretize_df(df, cols, n, newc=True, norm=False, norm_method=None):
+    dfd = df.copy()
+    if type(cols) is str:
+        cols = [cols]
+    for c in cols:
+        cname = c if not newc else c+'_discr'
+        dfd[cname] = discretize(df[c], n, norm, norm_method)
+    return dfd
+
+def discretize(values, n, norm=False, norm_method=None):
+    if norm:
+        values = normalize(values, norm_method) if norm_method else normalize(values)
+    delta = (max(values)-min(values)) / n
+    d = [min(values)]
+    while(d[-1:][0]<max(values)):
+        d.append(d[-1:][0]+delta)
+    dis = []
+    for v in values:
+        i = 0
+        while v > d[i+1]:
+            i=i+1
+        dis.append(i)
+    return dis
+
+def seriation(Z,N,cur_index):
+    '''
+        input:
+            - Z is a hierarchical tree (dendrogram)
+            - N is the number of points given to the clustering process
+            - cur_index is the position in the tree for the recursive traversal
+        output:
+            - order implied by the hierarchical tree Z
+
+        seriation computes the order implied by a hierarchical tree (dendrogram)
+    '''
+    if cur_index < N:
+        return [cur_index]
+    else:
+        left = int(Z[cur_index-N,0])
+        right = int(Z[cur_index-N,1])
+        return (seriation(Z,N,left) + seriation(Z,N,right))
+
+def compute_serial_matrix(dist_mat,method='complete'):
+    '''
+        input:
+            - dist_mat is a distance matrix
+            - method = ["ward","single","average","complete"]
+        output:
+            - seriated_dist is the input dist_mat,
+              but with re-ordered rows and columns
+              according to the seriation, i.e. the
+              order implied by the hierarchical tree
+            - res_order is the order implied by
+              the hierarhical tree
+            - res_linkage is the hierarhical tree (dendrogram)
+
+        compute_serial_matrix transforms a distance matrix into
+        a sorted distance matrix according to the order implied
+        by the hierarchical tree (dendrogram)
+    '''
+    N = len(dist_mat)
+    flat_dist_mat = squareform(dist_mat)
+    res_linkage = linkage(flat_dist_mat, method=method,preserve_input=True)
+    res_order = seriation(res_linkage, N, N + N-2)
+    seriated_dist = np.zeros((N,N))
+    a,b = np.triu_indices(N,k=1)
+    seriated_dist[a,b] = dist_mat[ [res_order[i] for i in a], [res_order[j] for j in b]]
+    seriated_dist[b,a] = seriated_dist[a,b]
+
+    return {'ordered_dist_mat':seriated_dist, 'res_order':res_order, 'res_linkage':res_linkage}
