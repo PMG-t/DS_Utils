@@ -297,22 +297,26 @@ def wsim(pos, neg=[], topn=10, thresh=0, comp=-1, model=_MODEL, yfilter=None, fi
     sim0 = list(model.wv.most_similar(positive=pos, negative=neg, topn=(100000000 if fill else topn)))
     sim1 = []
     if yfilter != None:
-        for s in sim0:
+        for idx,s in enumerate(sim0):
             filtered = len(list(select(_LEXICON, {'lemma':s[0], 'yl':yfilter})['lemma'])) == 0
             if (not filtered):
-                if (s[1]>thresh and len(sim1)<topn):
-                    sim1.append(s)
-                elif (fill and len(sim1)<topn):
-                    sim1.append(s)
+                if (s[1]>=thresh):
+                    if (len(sim1)<topn):
+                        sim1.append(s)
+                    else:
+                        break
                 else:
-                    break;
+                    if (fill and len(sim1)<topn):
+                        sim1.append(s)
+                    else:
+                        break;
             elif (fill and len(sim1)<topn):
                 pass
             else:
                 break
         sim0 = sim1
         sim1 = []
-    elif thresh>0 and not fill:
+    elif thresh>0:
         for s in sim0:
             if s[1]>thresh or (fill and s[1]<=thresh and len(sim1)<topn):
                 sim1.append(s)
