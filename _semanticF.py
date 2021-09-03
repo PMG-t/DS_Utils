@@ -19,8 +19,8 @@ from gensim.models import Word2Vec
 from gensim.models.phrases import Phrases, Phraser
 from scipy.spatial.distance import pdist, squareform
 from . import _paths as _PATHS
+from . import _costanti as C
 #%matplotlib inline
-
 
 # THIS MODULE NAME
 _MODULE_NAME = '_semanticF'
@@ -60,6 +60,11 @@ _SYMBOLS_TAG = ['y','ge']
 # SEABORN
 _SNS_FIG_SIZE=_fig_size = (10,10)
 sns.set(rc={'figure.figsize':_SNS_FIG_SIZE})
+
+#------------------------------------------------------------------------------#
+
+_CITIES = C._CITIES
+_TOPIC = C._TOPIC
 
 #------------------------------------------------------------------------------#
 
@@ -287,20 +292,27 @@ def wnorm(w, model=_MODEL):
 
 def wsim(pos, neg=[], topn=10, thresh=0, comp=-1, model=_MODEL, yfilter=None, fill=None):
     fill = True if (thresh==0 and fill==None) else fill
+    pos = [pos] if type(pos) is str else pos
+    neg = [neg] if type(neg) is str else neg
     sim0 = list(model.wv.most_similar(positive=pos, negative=neg, topn=(100000000 if fill else topn)))
     sim1 = []
     if yfilter != None:
         for s in sim0:
             filtered = len(list(select(_LEXICON, {'lemma':s[0], 'yl':yfilter})['lemma'])) == 0
-            if (not filtered) and ((s[1]>thresh) or (fill and len(sim1)<topn)):
-                sim1.append(s)
+            if (not filtered):
+                if (s[1]>thresh and len(sim1)<topn):
+                    sim1.append(s)
+                elif (fill and len(sim1)<topn):
+                    sim1.append(s)
+                else:
+                    break;
             elif (fill and len(sim1)<topn):
                 pass
             else:
                 break
         sim0 = sim1
         sim1 = []
-    elif thresh>0:
+    elif thresh>0 and not fill:
         for s in sim0:
             if s[1]>thresh or (fill and s[1]<=thresh and len(sim1)<topn):
                 sim1.append(s)
@@ -312,6 +324,14 @@ def wsim(pos, neg=[], topn=10, thresh=0, comp=-1, model=_MODEL, yfilter=None, fi
         sim0=sim1
         sim1=[]
     return sim0
+
+def wanal(str_anal, topn=10, thresh=0, comp=-1, model=_MODEL, yfilter=None, fill=None):
+    p1 = str_anal[:str_anal.index('=')]
+    p2 = str_anal[str_anal.index('=')+1:]
+    neg = p1[:p1.index(':')].replace(' ', '')
+    pos1 = p1[p1.index(':')+1:].replace(' ', '')
+    pos2 = p2[:p2.index(':')].replace(' ', '')
+    return wsim([pos1,pos2], neg, topn=topn, thresh=thresh, comp=comp, model=model, yfilter=yfilter, fill=fill)
 
 def wdist(w1, w2, model=_MODEL):
     w1 = model.wv[w1] if type(w1) is str else w1
@@ -424,10 +444,10 @@ def select(df, cts={}):
     return dfout
 
 def normalize(values , method='max-min'):
-    minv = min(values)
-    maxv = max(values)
+    minv = min(list(filter(lambda x: x > 0, values)))
+    maxv = max(list(filter(lambda x: x < 1, values)))
     if method=='max-min':
-        return [((v-minv) / (maxv-minv)) for v in values]
+        return [((v-minv) / (maxv-minv)) if v!=0 and v!=1 else v for v in values]
 
 def discretize_df(df, cols, n, newc=True, norm=False, norm_method=None):
     dfd = df.copy()
