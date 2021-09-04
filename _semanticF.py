@@ -7,28 +7,27 @@ import re
 import math
 import glob
 import scipy
+import heapq
 import pickle
 import zipfile
 import numpy as np
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+from more_itertools import split_at
+from pathlib import Path
 from fastcluster import linkage
 from termcolor import colored
 from gensim.models import Word2Vec
 from gensim.models.phrases import Phrases, Phraser
-from scipy.spatial.distance import pdist, squareform
+from scipy.spatial.distance import pdist, squareform, cosine
 from . import _paths as _PATHS
 from . import _costanti as C
 #%matplotlib inline
 
 # THIS MODULE NAME
 _MODULE_NAME = '_semanticF'
-# DIRECTORIES - PROJECT FOLDER and COCA ARCHIVE
-_BASE_DIR = _PATHS._BASE_DIR
-_COCA_PATH = _PATHS._COCA_PATH
-_MODEL_PATH = _BASE_DIR + 'grosso_SG_lemmatize.pkl'
-_LEXICON_PATH = _BASE_DIR + '\\Lexicon\\lexicon_lemmatize.csv'
+
 # CORPUS CATEGORIES
 _COCA_CATEGORIES = ['Academic', 'Blogs', 'Fiction', 'Magazine', 'Movies', 'Newspaper', 'Spoken']
 _DICT_CATEGORIES = {
@@ -42,24 +41,36 @@ _DICT_CATEGORIES = {
 }
 # LEXICON
 def load_lexicon(drop_na=True):
-    path = _LEXICON_PATH
-    lex = pd.read_csv(path, sep='\t')
-    if drop_na:
-        lex = lex.dropna()
-    return lex
+    path = P._LEXICON_PATH
+    if Path(path).is_file():
+        lex = pd.read_csv(path, sep='\t')
+        if drop_na:
+            lex = lex.dropna()
+        return lex
+    else:
+        print('Lexicon not found')
+        return None
+
+
 _LEXICON = load_lexicon()
 # W2V MODEL
-_MODEL = pickle.load(open(_MODEL_PATH, 'rb')) # .close ?
+if Path(P._MODEL_PATH).is_file():
+    _MODEL = pickle.load(open(P._MODEL_PATH, 'rb'))
+else:
+    _MODEL = None
+    print('Model not found')
 # HEADER GENERALI DEI DATAFRAME
 _WLP_HEADER = ['original', 'standard', 'y']
 # Y-TAG VARI
-_STOP_TAG = 'y_stop'
-_LEMMA_TAG = '^n|^jj|^v|^r'
+_STOP_TAG = 'ystop'
+_LEMMA_TAG = '^n|^jj|^vv|^r'
 _NEGATION_TAG = '^xx'
-_SYMBOLS_TAG = ['y','ge']
+_SYMBOLS_TAG = ['y','ge','.'] #PEZZOTTO
 # SEABORN
 _SNS_FIG_SIZE=_fig_size = (10,10)
 sns.set(rc={'figure.figsize':_SNS_FIG_SIZE})
+
+
 
 #------------------------------------------------------------------------------#
 
@@ -103,9 +114,9 @@ class Utils:
         if '\\' in filename:
             path = filename
         else:
-            if not os.path.exists(_BASE_DIR + '\\' + subfolder + '\\'):
-                os.mkdir(_BASE_DIR + '\\' + subfolder + '\\')
-            path = _BASE_DIR + '\\' + subfolder + '\\' + filename
+            if not os.path.exists(P._BASE_DIR + '\\' + subfolder + '\\'):
+                os.mkdir(P._BASE_DIR + '\\' + subfolder + '\\')
+            path = P._BASE_DIR + '\\' + subfolder + '\\' + filename
         file = open(path + '.pkl', 'wb')
         pickle.dump(object, file)
         file.close()
@@ -113,7 +124,7 @@ class Utils:
 
 
     def pickle_load(self, filename, subfolder='models'):
-        path = filename if '\\' in filename else _BASE_DIR + '\\' + subfolder + '\\' + filename
+        path = filename if '\\' in filename else P._BASE_DIR + '\\' + subfolder + '\\' + filename
         file = open(path + '.pkl', 'rb')
         object = pickle.load(file)
         file.close()
@@ -137,7 +148,7 @@ class Utils:
 U = Utils()
 
 def get_files(category, type='text'):
-    archive = zipfile.ZipFile(_COCA_PATH, 'r')
+    archive = zipfile.ZipFile(P._COCA_PATH, 'r')
     fn = 'COCA/' + category.capitalize() + '/' + type.lower() + '_' + _DICT_CATEGORIES[category.capitalize()]
     fn = U.get_element_in_list(archive.namelist(), fn, mode='like')[0]
     print(fn)
@@ -164,7 +175,7 @@ def wlp_to_csv(filename, wlp_content, do_format=True, write_csv=True):
     entries = wlp_splitlines(lines)
     df = pd.DataFrame(entries, columns=_WLP_HEADER)
     if write_csv:
-        df.to_csv(_BASE_DIR+filename+'.csv', sep='\t', index=False)
+        df.to_csv(P._BASE_DIR+filename+'.csv', sep='\t', index=False)
     return df
 
 def massivo_csv(type='wlp'):
@@ -172,26 +183,28 @@ def massivo_csv(type='wlp'):
     for category in list(_DICT_CATEGORIES.keys()):
         if category=='Blogs':
             for n in range(1,35):
-                tutti.append(_BASE_DIR + '\\' + category + '\\' + type + '_' + _DICT_CATEGORIES[category.capitalize()] + '_' + str(n).zfill(2) + '.csv')
+                tutti.append(P._BASE_DIR + '\\' + category + '\\' + type + '_' + _DICT_CATEGORIES[category.capitalize()] + '_' + str(n).zfill(2) + '.csv')
         else:
             for year in range(1990,2020):
-                tutti.append(_BASE_DIR + '\\' + category + '\\' + type + '_' + _DICT_CATEGORIES[category.capitalize()] + '_' + str(year) + '.csv')
+                tutti.append(P._BASE_DIR + '\\' + category + '\\' + type + '_' + _DICT_CATEGORIES[category.capitalize()] + '_' + str(year) + '.csv')
     return tutti
 
 
 def load_csv(category, year, type='wlp', drop_na=True):
-    path = _BASE_DIR + '\\' + category + '\\' + type + '_' + _DICT_CATEGORIES[category.capitalize()] + '_' + str(year) + '.csv'
+    path = P._BASE_DIR + '\\' + category + '\\' + type + '_' + _DICT_CATEGORIES[category.capitalize()] + '_' + str(year) + '.csv'
     df = pd.read_csv(path, sep='\t')
     if drop_na:
         df = df.dropna()
     return df
 
-def set_y_stop(df, standard_col='standard', y_col='y', stop_tag=_STOP_TAG):
+#ordine 1
+def set_y_stop(df, standard_col='standard', y_col='y', stop_tag=_STOP_TAG, sep=['.', ';', '?', '!']):
     y_cols = [y_col] if type(y_col) is str else y_col
     for y_col in y_cols:
-        df[y_col] = df.apply(lambda row: stop_tag if row[y_col] in _SYMBOLS_TAG and row[standard_col]=='.' else row[y_col], axis=1)
+        df[y_col] = df.apply(lambda row: stop_tag if row[y_col] in _SYMBOLS_TAG and row[standard_col] in sep else row[y_col], axis=1)
     return df
 
+#ordine 2
 def first_y_df(wlp_df, y_col='y'):
     wlp_df['first_y'] = wlp_df['y'].apply(lambda y: first_y(str(y)))
     return wlp_df.copy()
@@ -207,7 +220,7 @@ def lemmatize_df(df, lemma_col='first_y', tag=_LEMMA_TAG):
     if (lemma_col=='first_y') and (lemma_col not in list(df.columns)):
         df = first_y_df(df)
         df = set_y_stop(df, y_col=['y', 'first_y'])
-    return select(df.dropna(), {lemma_col:['re', tag+'|y_stop']})
+    return select(df.dropna(), {lemma_col:['re', tag+'|'+_STOP_TAG]})
 
 def del_symbols_df(df, lemma_col='first_y', tag=_SYMBOLS_TAG):
     tag = [tag] if type(tag) is str else tag
@@ -224,16 +237,18 @@ def preprocess_df(df, preprocess='lemmatize', process_col='first_y'):
     else:
         print('_semanticF: preprocess_df(): preprocess tecnique must be \'lemmatize\' or \'symbols\']')
 
-def get_sentences(dfs, sentence_col='standard', sep='.', preprocess=None):
+#ordine 3
+def get_sentences(dfs, sentence_col='standard', sep=['.', ';', '?', '!'], preprocess='lemmatize'):
     sentences = []
     dfs = [dfs] if type(dfs) is not list else dfs
     if preprocess:
         print('starting df preprocess ...')
         dfs = [preprocess_df(df, preprocess) for df in dfs]
     for df in dfs:
-        text = ' '.join(list(df[sentence_col]))
-        sentences = sentences + [[word.replace('-', '_') for word in sentence.split()] for sentence in text.split(' . ')]
+        raw_sentences = list(filter(None, list(split_at(list(df[sentence_col]), lambda x: x in sep))))
+        sentences = [[word.replace('-', '_') for word in sentence] for sentence in raw_sentences]
     return sentences
+
 
 def generate_bi_grams(sentences, **kwargs):
     phrases = Phrases(sentences, **kwargs)
@@ -247,17 +262,17 @@ def save_model():
     pass
 
 def w2v_df(dfs, sentence_col='standard', sep='.',
-    preprocess=None, min_count=5, vector_size=300,
+    preprocess='lemmatize', min_count=5, vector_size=300,
     model='SG', model_filename='default_model'):
     print('getting sentences ...')
     sentences = get_sentences(dfs, sentence_col=sentence_col, sep=sep, preprocess=preprocess)
     print('done sentences!')
     print('getting bi-grams ...')
     bi_gram_sentences = generate_bi_grams(sentences,
-                                        min_count=5,
-                                        threshold=7,
+                                        min_count=10,
+                                        threshold=0.5,
                                         progress_per=1000,
-                                        #scoring='npmi'
+                                        scoring='npmi'
                                         )
     print('done bi-grams!')
     w2v_model = w2v(bi_gram_sentences, min_count=min_count, vector_size=vector_size, model=model)
@@ -271,6 +286,18 @@ def w2v(sentences, min_count=5, vector_size=300, model='SG'):
     w2v_model = Word2Vec(sentences, min_count=min_count, vector_size=vector_size, sg=model)
     print('model completed ...')
     return w2v_model
+
+
+def word_similarities(model, vector, topn=10):
+    if isinstance(model, Word2Vec):
+        model = model.wv
+    # i -> index of word in model vocab
+    # x -> array of word in model
+    #1- => similarity
+    _dict = { model.index_to_key[i]:1-cosine(model[i], vector) for i in list(range(len(model)))}         
+    ordered_list = {k: _dict[k] for k in heapq.nlargest(topn, _dict, key=_dict.get)}
+    return ordered_list
+
 
 def wvec(w, model=_MODEL):
     return model.wv[w]
