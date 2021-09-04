@@ -30,6 +30,7 @@ from . import _costanti as C
 
 class Paths:
 
+    #setup your paths
     def __init__(self):
         self._BASE_DIR = _PATHS._BASE_DIR
         self._COCA_PATH = _PATHS._COCA_PATH
@@ -320,19 +321,22 @@ def word_similarities(model, vector, topn=10):
 # - threshold: minimum similarity
 # - topn: max words for each entity
 def get_related_words(model, entities, total_words, threshold, topn):
+
+    if isinstance(model, Word2Vec):
+        model = model.wv
     res = {}
     for entity in entities:
         res[entity] = _get_related_words_single(model, entity, total_words, threshold, topn)
     return res
 
 def _get_related_words_single(model, entity, total_words, threshold, topn):
-    tmp = [1-model.wv.distance(w, entity) for w in total_words]
+    tmp = [1-model.distance(w, entity) for w in total_words]
     tw2 = total_words.copy()
     top_words = []
     for j in range(topn):
         i = tmp.index(np.max(tmp))
         if tmp[i] > threshold:
-            top_words.append(tw2[i])
+            top_words.append((tw2[i], tmp[i]))
         else:
             break
         del tmp[i]
