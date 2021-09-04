@@ -287,7 +287,7 @@ def w2v(sentences, min_count=5, vector_size=300, model='SG'):
     print('model completed ...')
     return w2v_model
 
-
+# get list of most similar words to a given vector
 def word_similarities(model, vector, topn=10):
     if isinstance(model, Word2Vec):
         model = model.wv
@@ -297,6 +297,32 @@ def word_similarities(model, vector, topn=10):
     _dict = { model.index_to_key[i]:1-cosine(model[i], vector) for i in list(range(len(model)))}         
     ordered_list = {k: _dict[k] for k in heapq.nlargest(topn, _dict, key=_dict.get)}
     return ordered_list
+
+# get the most similar words to each single entity
+# - model: w2v model
+# - entities: list of strings
+# - total_words: list of strings
+# - threshold: minimum similarity
+# - topn: max words for each entity
+def get_related_words(model, entities, total_words, threshold, topn):
+    res = {}
+    for entity in entities:
+        res[entity] = _get_related_words_single(model, entity, total_words, threshold, topn)
+    return res
+
+def _get_related_words_single(model, entity, total_words, threshold, topn):
+    tmp = [1-model.wv.distance(w, entity) for w in total_words]
+    tw2 = total_words.copy()
+    top_words = []
+    for j in range(topn):
+        i = tmp.index(np.max(tmp))
+        if tmp[i] > threshold:
+            top_words.append(tw2[i])
+        else:
+            break
+        del tmp[i]
+        del tw2[i]
+    return top_words
 
 
 def wvec(w, model=_MODEL):
