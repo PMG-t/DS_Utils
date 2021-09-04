@@ -25,6 +25,21 @@ from . import _paths as _PATHS
 from . import _costanti as C
 #%matplotlib inline
 
+
+#------------------------------------------------------------------------------#
+
+class Paths:
+
+    def __init__(self):
+        self._BASE_DIR = _PATHS._BASE_DIR
+        self._COCA_PATH = _PATHS._COCA_PATH
+        self._MODEL_PATH = _PATHS._BASE_DIR + 'grosso_SG_lemmatize.pkl'
+        self._LEXICON_PATH = _PATHS._BASE_DIR + '\\Lexicon\\lexicon_lemmatize.csv'
+
+
+P = Paths()
+
+
 # THIS MODULE NAME
 _MODULE_NAME = '_semanticF'
 
