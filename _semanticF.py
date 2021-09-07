@@ -314,29 +314,36 @@ def word_similarities(model, vector, topn=10):
     ordered_list = {k: _dict[k] for k in heapq.nlargest(topn, _dict, key=_dict.get)}
     return ordered_list
 
+
 # get the most similar words to each single entity
 # - model: w2v model
 # - entities: list of strings
 # - total_words: list of strings
-# - threshold: minimum similarity
-# - topn: max words for each entity
-def get_related_words(model, entities, total_words, threshold, topn):
-
-    if isinstance(model, Word2Vec):
-        model = model.wv
+# - threshold: minimum similarity, in [0,1]
+# - topn: max words for each entity (if -1, show every word)
+# - include_sim: boolean, includes similarity values
+def get_related_words(model, entities, total_words, threshold, topn, include_sim):
     res = {}
     for entity in entities:
-        res[entity] = _get_related_words_single(model, entity, total_words, threshold, topn)
+        res[entity] = _get_related_words_single(model, entity, total_words, threshold, topn, include_sim)
+        
     return res
 
-def _get_related_words_single(model, entity, total_words, threshold, topn):
-    tmp = [1-model.distance(w, entity) for w in total_words]
+def _get_related_words_single(model, entity, total_words, threshold, topn, include_sim):
+    tmp = [1-model.wv.distance(w, entity) for w in total_words]
     tw2 = total_words.copy()
     top_words = []
+    
+    if topn==-1:
+        topn = len(total_words)
+    
     for j in range(topn):
         i = tmp.index(np.max(tmp))
         if tmp[i] > threshold:
-            top_words.append((tw2[i], tmp[i]))
+            value = (tw2[i], tmp[i])
+            if not include_sim:
+                value = value[0]
+            top_words.append(value)
         else:
             break
         del tmp[i]
