@@ -2,7 +2,7 @@
 _CITIES = {}
 
 _CITIES['africa'] = ['kinshasa', 'lagos', 'cairo', 'giza', 'johannesburg', 'rabat', 'casablanca', 'dakar', 
-                    'nairobi', 'capetown']
+                    'nairobi', 'capetown', 'tripoli']
 
 _CITIES['asia'] = ['tokyo', 'delhi', 'shanghai', 'dhaka', 'mumbai', 'beijing', 'osaka', 'seoul', 'istanbul', 
                   'islamabad', 'bangkok', 'singapore', 'jakarta', 'dubai', 'baghdad', 'kabul', 'pyongyang', 
@@ -12,8 +12,8 @@ _CITIES['australia'] = ['melbourne', 'sydney', 'perth', 'wellington']
 
 _CITIES['europe'] = ['london', 'cardiff', 'belfast', 'edinburgh', 'dublin', 'birmingham', 'leeds', 'glasgow', 
                     'sheffield', 'berlin', 'hamburg', 'munich', 'frankfurt', 'stuttgart', 'rome', 'milan', 
-                    'florence', 'naples', 'turin', 'palermo', 'bologna', 'madrid', 'barcelona', 'valencia', 
-                    'seville', 'paris', 'lyon', 'marseille', 'toulouse', 'moscow', 'saint_petersburg', 'krakow', 
+                    'florence', 'naples', 'turin', 'messina', 'bologna', 'madrid', 'barcelona', 
+                    'paris', 'lyon', 'marseille', 'toulouse', 'moscow', 'saint_petersburg', 'krakow', 
                     'warsaw', 'lisbon', 'porto', 'amsterdam', 'stockholm', 'belgrade', 'vienna', 'oslo', 
                     'budapest', 'copenhagen', 'athens', 'helsinki', 'tallinn', 'kyiv', 'prague', 'brussels', 
                     'tirana', 'bucharest', 'vilnius', 'riga', 'reykjavik', 'bratislava']
@@ -23,10 +23,10 @@ _CITIES['north_america'] = ['new_york', 'los_angeles', 'chicago', 'houston', 'ph
                            'fort_worth', 'indianapolis', 'columbus', 'charlotte', 'san_francisco', 'seattle', 
                            'denver', 'washington', 'nashville', 'el_paso', 'boston', 'portland', 'detroit', 
                            'memphis', 'kansas_city', 'new_orleans', 'miami', 'honolulu', 'ottawa', 'toronto', 
-                           'montreal', 'havana', 'la_vegas']
+                           'montreal', 'vancouver', 'havana', 'la_vegas']
 
 _CITIES['south_america'] = ['bogota', 'caracas', 'lima', 'brasilia', 'quito', 'montevideo', 'buenos_aires', 
-                           'la_paz', 'sao_paulo']
+                           'la_paz', 'sao_paulo', 'santiago_chile', 'rio_janeiro']
 
 _TOT_CITIES = [item for sublist in list(_CITIES.values()) for item in sublist] 
 

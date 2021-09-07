@@ -75,6 +75,8 @@ def read_coords(filename, _cities):
     coords['tmp'] = coords['lat']
     coords['lat'] = coords['lng']
     coords['lng'] = coords['tmp']
+    
+    coords = coords[['lat', 'lng']]
 
     pos = coords.to_dict('index')
     pos = {c: (pos[c]['lat'], pos[c]['lng']) for c in pos}
