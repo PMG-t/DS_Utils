@@ -58,8 +58,13 @@ _CITIES = ['paris',
  'chennai',
  'marrakesh']
 
+_TOPICS = {}
 
-_TOPIC = {}
+_TOPICS['food']      =   ['restaurant',   'cuisine',      'recipe']
+_TOPICS['art']       =   ['history',      'monument',     'museum']
+_TOPICS['nature']    =   ['wild',         'landscape',    'panorama']
+
+
 # WORDS['crime'] = ['abduction', 'arson', 'assassination', 'assault', 'bigamy', 'blackmail',
 #                  'bombing', 'bribery', 'burglary', 'child abuse', 'corruption', 'crime', 'cybercrime',
 #                  'domestic violence', 'drunk driving', 'embezzlement', 'espionage', 'forgery',
@@ -69,17 +74,17 @@ _TOPIC = {}
 #                  'shoplifting', 'slander', 'smuggling', 'speeding', 'terrorism', 'theft',
 #                  'trafficking', 'treason', 'trespassing', 'vandalism', 'voyeurism']
 
-_TOPIC['education'] = ['education', 'school', 'university', 'student', 'teach', 'scolarship']
+_TOPICS['education'] = ['school', 'university', 'student', 'teach', 'scolarship']
 
-_TOPIC['food'] = ['food', 'restaurant', 'cuisine', 'recipe']
 
-_TOPIC['work'] = ['job', 'work', 'salary', 'business', 'career', 'office', 'secretary', 'colleague', 'profession']
 
-_TOPIC['nightlife'] = ['nightlife', 'pub', 'bar', 'disco', 'club', 'cinema', 'festival', 'nightclub']
+_TOPICS['work'] = ['job', 'salary', 'business', 'career', 'office', 'secretary', 'colleague', 'profession']
 
-_TOPIC['holiday'] = ['holiday', 'vacation', 'trip', 'hotel', 'festivity', 'summer']
+_TOPICS['nightlife'] = ['pub', 'bar', 'disco', 'club', 'cinema', 'festival', 'nightclub']
 
-_TOPIC['cold'] = ['cold', 'winter', 'snow', 'freeze', 'hailstorm']
+_TOPICS['holiday'] = ['vacation', 'trip', 'hotel', 'festivity', 'summer']
+
+_TOPICS['cold'] = ['winter', 'snow', 'freeze', 'hailstorm']
 
 
 #['rapid', 'wasteful', 'expensive', 'cheap', 'efficient', 'satisfying', 'slow', 'safe', 'dangerous']

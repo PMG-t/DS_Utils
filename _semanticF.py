@@ -15,6 +15,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from fastcluster import linkage
 from termcolor import colored
+from sklearn.cluster import DBSCAN
 from gensim.models import Word2Vec
 from gensim.models.phrases import Phrases, Phraser
 from scipy.spatial.distance import pdist, squareform
@@ -64,7 +65,7 @@ sns.set(rc={'figure.figsize':_SNS_FIG_SIZE})
 #------------------------------------------------------------------------------#
 
 _CITIES = C._CITIES
-_TOPIC = C._TOPIC
+_TOPICS = C._TOPICS
 
 #------------------------------------------------------------------------------#
 
@@ -286,38 +287,53 @@ def wsum(w1, w2, model=_MODEL):
     w2 = model.wv[w2] if type(w2) is str else w2
     return w1 + w1
 
+def wdiff(w1, w2, model=_MODEL):
+    w1 = model.wv[w1] if type(w1) is str else w1
+    w2 = model.wv[w2] if type(w2) is str else w2
+    return np.subtract(w1,w2)
+
 def wnorm(w, model=_MODEL):
     vec = model.wv[w] if type(w) is str else w
     return math.sqrt(sum([math.pow(v,2) for v in vec]))
 
-def wsim(pos, neg=[], topn=10, thresh=0, comp=-1, model=_MODEL, yfilter=None, fill=None):
+def wsim(pos, neg=[], topn=10, thresh=0, low_thresh=0, comp=-1, model=_MODEL, yfilter=None, fill=None):
     fill = True if (thresh==0 and fill==None) else fill
     pos = [pos] if type(pos) is str else pos
     neg = [neg] if type(neg) is str else neg
     sim0 = list(model.wv.most_similar(positive=pos, negative=neg, topn=(100000000 if fill else topn)))
     sim1 = []
     if yfilter != None:
+        done = False
         for idx,s in enumerate(sim0):
-            filtered = len(list(select(_LEXICON, {'lemma':s[0], 'yl':yfilter})['lemma'])) == 0
-            if (not filtered):
-                if (s[1]>=thresh):
-                    if (len(sim1)<topn):
-                        sim1.append(s)
-                    else:
-                        break
+            if not done:
+                if s[1]<low_thresh:
+                    done=True
                 else:
-                    if (fill and len(sim1)<topn):
-                        sim1.append(s)
+                    filtered = len(list(select(_LEXICON, {'lemma':s[0], 'yl':yfilter})['lemma'])) == 0
+                    if (not filtered):
+                        if (s[1]>=thresh):
+                            if (len(sim1)<topn):
+                                sim1.append(s)
+                            else:
+                                done=True
+                        else:
+                            if (fill and len(sim1)<topn):
+                                sim1.append(s)
+                            else:
+                                done=True
+                    elif (fill and len(sim1)<topn):
+                        pass
                     else:
-                        break;
-            elif (fill and len(sim1)<topn):
-                pass
+                        done=True
             else:
+                print('oooo')
                 break
         sim0 = sim1
         sim1 = []
     elif thresh>0:
         for s in sim0:
+            if s[1]<low_thresh:
+                break
             if s[1]>thresh or (fill and s[1]<=thresh and len(sim1)<topn):
                 sim1.append(s)
         sim0 = sim1
@@ -329,18 +345,25 @@ def wsim(pos, neg=[], topn=10, thresh=0, comp=-1, model=_MODEL, yfilter=None, fi
         sim1=[]
     return sim0
 
-def wanal(str_anal, topn=10, thresh=0, comp=-1, model=_MODEL, yfilter=None, fill=None):
+def wanal(str_anal, topn=10, thresh=0, low_thresh=0, comp=-1, model=_MODEL, yfilter=None, fill=None):
     p1 = str_anal[:str_anal.index('=')]
     p2 = str_anal[str_anal.index('=')+1:]
     neg = p1[:p1.index(':')].replace(' ', '')
     pos1 = p1[p1.index(':')+1:].replace(' ', '')
     pos2 = p2[:p2.index(':')].replace(' ', '')
-    return wsim([pos1,pos2], neg, topn=topn, thresh=thresh, comp=comp, model=model, yfilter=yfilter, fill=fill)
+    return wsim([pos1,pos2], neg, topn=topn, thresh=thresh, low_thresh=low_thresh, comp=comp, model=model, yfilter=yfilter, fill=fill)
 
 def wdist(w1, w2, model=_MODEL):
     w1 = model.wv[w1] if type(w1) is str else w1
     w2 = model.wv[w2] if type(w2) is str else w2
     return 1-scipy.spatial.distance.cosine(w1, w2)
+
+def wchoesion(words, gamma=1, model=_MODEL):
+    sum = 0
+    for w1 in words:
+        for w2 in words:
+            sum = sum + (math.pow((1-wdist(w1,w2,model=model)),gamma) if w1!=w2 else 0)
+    return (sum / (math.pow(len(words),2)-len(words))) if (math.pow(len(words),2)-len(words))!=0 else 0
 
 def gety(w, model=_MODEL):
     ys = list(select(_LEXICON, {'lemma':w})['yl'])
@@ -357,6 +380,47 @@ def is_verb(w, model=_MODEL):
 
 def is_adv(w, model=_MODEL):
     return 'r'==gety(w, model)
+
+def dist_matrix2(words1, city, topic, words2=[], norm=True, show=True, fig_size=_SNS_FIG_SIZE, model=_MODEL):
+    matrix=[]
+    words2 = words2 if len(words2)>0 else words1
+    for w1 in words1:
+        row = []
+        for w2 in words2:
+            f1 = wdist(wdiff('city', city, model=model), wdiff(topic,w1, model=model), model=model)
+            f2 = wdist(wdiff('city', city, model=model), wdiff(topic,w2, model=model), model=model)
+            f = f1*f2 if (f1>0 and f2>0) else 0
+            row.append(wdist(w1,w2,model=model)*f if w1!=w2 else 1)
+        matrix.append(row)
+    if norm:
+        vlen = len(matrix[0])
+        flat_matrix = list(np.array(matrix).reshape(-1))
+        flat_matrix = normalize(flat_matrix)
+        matrix = list(np.array(flat_matrix).reshape(int(len(flat_matrix)/vlen),vlen))
+    if show:
+        _fig_size = (10,10)
+        sns.set(rc={'figure.figsize': fig_size })
+        mat=sns.heatmap(np.array(matrix))
+    return {'matrix': matrix, 'words': ((words1, words2) if words1 != words2 else words1)}
+
+def dist_matrix3(words1, words2=[], norm=True, gamma=1, show=True, fig_size=_SNS_FIG_SIZE, model=_MODEL):
+    matrix=[]
+    words2 = words2 if len(words2)>0 else words1
+    for w1 in words1:
+        row = []
+        for w2 in words2:
+            row.append(math.pow(wdist(w1,w2,model=model), gamma))
+        matrix.append(row)
+    if norm:
+        vlen = len(matrix[0])
+        flat_matrix = list(np.array(matrix).reshape(-1))
+        flat_matrix = normalize(flat_matrix)
+        matrix = list(np.array(flat_matrix).reshape(int(len(flat_matrix)/vlen),vlen))
+    if show:
+        _fig_size = (10,10)
+        sns.set(rc={'figure.figsize': fig_size })
+        mat=sns.heatmap(np.array(matrix))
+    return {'matrix': matrix, 'words': ((words1, words2) if words1 != words2 else words1)}
 
 def dist_matrix(words1, words2=[], norm=True, show=True, fig_size=_SNS_FIG_SIZE, model=_MODEL):
     matrix=[]
@@ -377,20 +441,53 @@ def dist_matrix(words1, words2=[], norm=True, show=True, fig_size=_SNS_FIG_SIZE,
         mat=sns.heatmap(np.array(matrix))
     return {'matrix': matrix, 'words': ((words1, words2) if words1 != words2 else words1)}
 
-def sort_dist_matrix(dist_matrix, method='complete', initial_values=[]):
+def sort_dist_matrix(dist_matrix, method='complete', show=True, norm=False, initial_values=[]):
+    if norm:
+        vlen = len(dist_matrix[0])
+        flat_matrix = list(np.array(dist_matrix).reshape(-1))
+        flat_matrix = normalize(flat_matrix)
+        dist_matrix = list(np.array(flat_matrix).reshape(int(len(flat_matrix)/vlen),vlen))
     if int(dist_matrix[0][0]) == 1:
         dist_matrix = [[(1-v) for v in row] for row in dist_matrix]
     if type(dist_matrix) is not np.array:
         dist_matrix = np.array([np.array(row) for row in dist_matrix])
     out = compute_serial_matrix(dist_matrix, method)
-    N=len(out['ordered_dist_mat'])
-    plt.pcolormesh(out['ordered_dist_mat'])
+    if show:
+        plot_dist_matrix(out['ordered_dist_mat'])
+    if initial_values != []:
+        out['words'] = [initial_values[i] for i in out['res_order']]
+    return out
+
+def plot_dist_matrix(dist_matrix):
+    N=len(dist_matrix)
+    plt.pcolormesh(dist_matrix)
     plt.colorbar()
     plt.xlim([0,N])
     plt.ylim([0,N])
     plt.show()
-    if initial_values != []:
-        out['words'] = [initial_values[i] for i in out['res_order']]
+
+def dm_cluster(dist_matrix, elements, eps='auto', min_samples=2):
+    if eps=='auto':
+        flat = list(np.reshape(dist_matrix,-1))
+        eps = ((sum(flat)-math.sqrt(len(flat))) / (len(flat)-math.sqrt(len(flat)))) - np.std(flat)
+        eps = eps if eps > 0 else 0.1
+    clustering = DBSCAN(eps=eps, min_samples=2, metric='precomputed').fit(dist_matrix)
+    out = {
+        'core_sample_indices': clustering.core_sample_indices_,
+        'components': clustering.components_,
+        'labels': list(clustering.labels_),
+    }
+    cluster = {c:{'words': [], 'score':0} for c in list(set(out['labels']))}
+    for i,l in enumerate(out['labels']):
+        try:
+            cluster[l]['words'].append(elements[i])
+        except:
+            print(i,l,elements)
+    for c in list(cluster.keys()):
+        num_score = len(cluster[c]['words'])/len(elements)
+        cho_score = wchoesion(cluster[c]['words'], gamma=1)
+        cluster[c]['score'] = {'pdim': num_score, 'choesion':cho_score}
+    out['cluster'] = cluster
     return out
 
 def n_select(df, col, n_val):
@@ -447,9 +544,13 @@ def select(df, cts={}):
             dfout = n_select(dfout, ccol, cval).copy()
     return dfout
 
-def normalize(values , method='max-min'):
-    minv = min(list(filter(lambda x: x > 0, values)))
-    maxv = max(list(filter(lambda x: x < 1, values)))
+def normalize(values, method='max-min'):
+    try:
+        minv = min(list(filter(lambda x: x > 0, values)))
+        maxv = max(list(filter(lambda x: x < 1, values)))
+    except:
+        minv = min(values)
+        maxv = max(values)
     if method=='max-min':
         return [((v-minv) / (maxv-minv)) if v!=0 and v!=1 else v for v in values]
 
@@ -523,3 +624,13 @@ def compute_serial_matrix(dist_mat,method='complete'):
     seriated_dist[b,a] = seriated_dist[a,b]
 
     return {'ordered_dist_mat':seriated_dist, 'res_order':res_order, 'res_linkage':res_linkage}
+
+def pretty(d, indent=0, nokeys=[]):
+    for key, value in d.items():
+        if key not in nokeys:
+            print('\t' * indent + str(key) + ': ' + ('{' if isinstance(value, dict) else ''))
+            if isinstance(value, dict):
+                pretty(value, indent+1, nokeys=nokeys)
+                print('\t' * indent + '}')
+            else:
+                print('\t' * (indent+1) + str(value))
