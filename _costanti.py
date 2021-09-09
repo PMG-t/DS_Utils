@@ -35,6 +35,7 @@ _TOT_CITIES = [item for sublist in list(_CITIES.values()) for item in sublist]
 # -----------------------------
 
 
+
 _TOPIC = {}
 
 _TOPIC['crime'] = ['abduction', 'arson', 'assassination', 'blackmail', 'bombing', 'bribery', 'burglary', 'child_abuse', 
@@ -75,8 +76,8 @@ _TOPIC['pollution'] = ['pollution', 'waste', 'toxic', 'toxin', 'impurity', 'cont
                        'smog', 'dioxide', 'sulfur', 'emission', 'eutrophication', 'deforestation']
 
 _TOPIC['history'] = ['king', 'queen', 'historical', 'castle', 'ruin', 'church', 'philosophy', 'medieval', 'history', 'knight', 
-                     'museum', 'temple', 'antiquity', 'ancient', 'cathedral', 'monument', 'museum', 'archeological', 
-                     'heritage', 'tradition', 'culture', 'amphitheater']
+                     'museum', 'temple', 'antiquity', 'ancient', 'cathedral', 'monument', 'archeological', 'tradition', 
+                     'culture', 'amphitheater']
 
 _TOPIC['gambling'] = ['gambling', 'game', 'luck', 'chance', 'card', 'roulette', 'casino', 'blackjack', 'poker', 'slot', 
                       'gambler', 'wagering', 'croupier', 'bet', 'bookie', 'bookmaker', 'speculator', 'risk_taking', 
@@ -117,3 +118,37 @@ _TOPIC['fashion'] = ['hairdresser', 'hairstylist', 'stylist', 'manicure', 'pedic
 
 
 _TOT_TOPIC = [item for sublist in list(_TOPIC.values()) for item in sublist]
+
+
+_REVERSE_TOPIC = {}
+for topic in _TOPIC:
+    _REVERSE_TOPIC.update({word: topic for word in _TOPIC[topic]})
+
+
+
+# -----------------------------
+
+
+
+_COLOR = {}
+_COLOR['fitness'] = (240,163,255)
+_COLOR['nightlife'] = (0,117,220)
+_COLOR['alcohol'] = (153,63,0)
+_COLOR['gambling'] = (76,0,92)
+_COLOR['pollution'] = (25,25,25)
+_COLOR['vegetation'] = (0,92,49)
+_COLOR['environment'] = (43,206,72)
+_COLOR['animals'] = (255,204,153)
+_COLOR['work'] = (128,128,128)
+_COLOR['professions'] = (143,124,0)
+_COLOR['education'] = (157,204,0)
+_COLOR['sport'] = (194,0,136)
+_COLOR['food'] = (255,164,5)
+_COLOR['music'] = (255,168,187)
+_COLOR['crime'] = (255,0,16)
+_COLOR['cold'] = (94,241,242)
+_COLOR['sport'] = (0,153,143)
+_COLOR['transportation'] = (153,0,0)
+_COLOR['history'] = (247,226,32)
+_COLOR['hot'] = (255,80,5)
+_COLOR['fashion'] = (190, 88, 245)
