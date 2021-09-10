@@ -314,43 +314,6 @@ def word_similarities(model, vector, topn=10):
     ordered_list = {k: _dict[k] for k in heapq.nlargest(topn, _dict, key=_dict.get)}
     return ordered_list
 
-
-# get the most similar words to each single entity
-# - model: w2v model
-# - entities: list of strings
-# - total_words: list of strings
-# - threshold: minimum similarity, in [0,1]
-# - topn: max words for each entity (if -1, show every word)
-# - include_sim: boolean, includes similarity values
-def get_related_words(model, entities, total_words, threshold, topn, include_sim):
-    res = {}
-    for entity in entities:
-        res[entity] = _get_related_words_single(model, entity, total_words, threshold, topn, include_sim)
-        
-    return res
-
-def _get_related_words_single(model, entity, total_words, threshold, topn, include_sim):
-    tmp = [1-model.wv.distance(w, entity) for w in total_words]
-    tw2 = total_words.copy()
-    top_words = []
-    
-    if topn==-1:
-        topn = len(total_words)
-    
-    for j in range(topn):
-        i = tmp.index(np.max(tmp))
-        if tmp[i] > threshold:
-            value = (tw2[i], tmp[i])
-            if not include_sim:
-                value = value[0]
-            top_words.append(value)
-        else:
-            break
-        del tmp[i]
-        del tw2[i]
-    return top_words
-
-
 def wvec(w, model=_MODEL):
     return model.wv[w]
 
@@ -596,3 +559,77 @@ def compute_serial_matrix(dist_mat,method='complete'):
     seriated_dist[b,a] = seriated_dist[a,b]
 
     return {'ordered_dist_mat':seriated_dist, 'res_order':res_order, 'res_linkage':res_linkage}
+
+
+
+# get the most similar words to each single entity
+# - model: w2v model
+# - entities: list of strings
+# - total_words: list of strings
+# - threshold: minimum similarity, in [0,1]
+# - topn: max words for each entity (if -1, shows every word)
+# - include_sim: boolean, includes similarity values
+def get_related_words(model, entities, total_words, threshold, topn, include_sim=True):
+    return {e: _get_related_words_single(model, e, total_words, threshold, topn, include_sim) for e in entities}
+
+
+def _get_related_words_single(model, entity, total_words, threshold, topn, include_sim):
+    # calc similarities
+    top_words = {w: 1-model.wv.distance(w, entity) for w in total_words}
+    top_words = sort_dict_by_value(top_words, True)
+    
+    # check threshold and topn
+    if topn==-1:
+        topn = len(total_words)
+    top_words = {w: top_words[w] for w in list(top_words.keys())[:topn] if top_words[w]>threshold}
+    
+    #return
+    if include_sim==False:
+        return list(top_words.keys())
+    else:
+        return top_words
+
+
+# calculate distances between every topic, 
+# by averaging top 3 similar words for each pair of topics
+# returns dict: topic_dist['crime']['vegetation']=0.22
+def calc_topic_sim(model):
+    topic_sim = {x: {y: 0 for y in C._TOPIC if x != y} for x in C._TOPIC}
+    for t1 in topic_sim:
+        for t2 in topic_sim[t1]:
+            dists = [1-model.wv.distance(k1, k2) for k1 in C._TOPIC[t1] for k2 in C._TOPIC[t2]]
+            topic_sim[t1][t2] = np.mean(sorted(dists, reverse=True)[:3])
+    return topic_sim
+
+
+# score = combination of topic_similarities and keywords_entropy
+def score(topics_frequencies, topic_sim):
+    topics = list(topics_frequencies.keys())
+    values = list(topics_frequencies.values())
+    
+    if len(topics) == 0:
+        return 0
+    elif len(topics) == 1:
+        topic_similarities = max([max(topic_sim[t].values()) for t in topic_sim]) #max existing value
+    else:
+        topic_similarities = np.mean([topic_sim[t1][t2] for t1 in topics for t2 in topics if t1 != t2])
+    
+    return topic_similarities * entropy(values)
+
+
+def entropy(arr):
+    if [arr[0]] * len(arr) == arr:
+        return 1.5/np.sqrt(len(arr))
+    return np.std(arr)/np.sqrt(len(arr))
+
+
+def flatten(arr):
+    return [item for sublist in arr for item in sublist]
+
+
+def sort_dict_by_key(d, reverse=False):
+    return {key: d[key] for key in sorted(d.keys(), reverse=reverse)}
+
+
+def sort_dict_by_value(d, reverse=True):
+    return dict(sorted(d.items(), key=lambda item: item[1], reverse=reverse))
