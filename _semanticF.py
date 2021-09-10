@@ -781,3 +781,16 @@ def sort_dict_by_key(d, reverse=False):
 
 def sort_dict_by_value(d, reverse=True):
     return dict(sorted(d.items(), key=lambda item: item[1], reverse=reverse))
+
+def gcorr(lst, g):
+    m = max(lst)
+    return [math.pow((v/m),g)*m for v in lst]
+
+def rescale(lst, NewMin, NewMax):
+    OldMin = min(lst)
+    OldMax = max(lst)
+    return [((((OldValue - OldMin) * (NewMax - NewMin)) / (OldMax - OldMin)) + NewMin) for OldValue in lst]
+
+def rescale_dict(diz, min, max):
+    tmp = rescale([v+1 for v in diz.values()],min,max)
+    return {k:tmp[i] for i,k in enumerate(diz.keys())}
