@@ -707,3 +707,77 @@ def pretty(d, indent=0, nokeys=[]):
                 print('\t' * indent + '}')
             else:
                 print('\t' * (indent+1) + str(value))
+
+
+
+# get the most similar words to each single entity
+# - model: w2v model
+# - entities: list of strings
+# - total_words: list of strings
+# - threshold: minimum similarity, in [0,1]
+# - topn: max words for each entity (if -1, shows every word)
+# - include_sim: boolean, includes similarity values
+def get_related_words(model, entities, total_words, threshold, topn, include_sim=True):
+    return {e: _get_related_words_single(model, e, total_words, threshold, topn, include_sim) for e in entities}
+
+
+def _get_related_words_single(model, entity, total_words, threshold, topn, include_sim):
+    # calc similarities
+    top_words = {w: 1-model.wv.distance(w, entity) for w in total_words}
+    top_words = sort_dict_by_value(top_words, True)
+
+    # check threshold and topn
+    if topn==-1:
+        topn = len(total_words)
+    top_words = {w: top_words[w] for w in list(top_words.keys())[:topn] if top_words[w]>threshold}
+
+    #return
+    if include_sim==False:
+        return list(top_words.keys())
+    else:
+        return top_words
+
+
+# calculate distances between every topic,
+# by averaging top 3 similar words for each pair of topics
+# returns dict: topic_dist['crime']['vegetation']=0.22
+def calc_topic_sim(model):
+    topic_sim = {x: {y: 0 for y in C._TOPIC if x != y} for x in C._TOPIC}
+    for t1 in topic_sim:
+        for t2 in topic_sim[t1]:
+            dists = [1-model.wv.distance(k1, k2) for k1 in C._TOPIC[t1] for k2 in C._TOPIC[t2]]
+            topic_sim[t1][t2] = np.mean(sorted(dists, reverse=True)[:3])
+    return topic_sim
+
+
+# score = combination of topic_similarities and keywords_entropy
+def score(topics_frequencies, topic_sim):
+    topics = list(topics_frequencies.keys())
+    values = list(topics_frequencies.values())
+
+    if len(topics) == 0:
+        return 0
+    elif len(topics) == 1:
+        topic_similarities = max([max(topic_sim[t].values()) for t in topic_sim]) #max existing value
+    else:
+        topic_similarities = np.mean([topic_sim[t1][t2] for t1 in topics for t2 in topics if t1 != t2])
+
+    return topic_similarities * entropy(values)
+
+
+def entropy(arr):
+    if [arr[0]] * len(arr) == arr:
+        return 1.5/np.sqrt(len(arr))
+    return np.std(arr)/np.sqrt(len(arr))
+
+
+def flatten(arr):
+    return [item for sublist in arr for item in sublist]
+
+
+def sort_dict_by_key(d, reverse=False):
+    return {key: d[key] for key in sorted(d.keys(), reverse=reverse)}
+
+
+def sort_dict_by_value(d, reverse=True):
+    return dict(sorted(d.items(), key=lambda item: item[1], reverse=reverse))
