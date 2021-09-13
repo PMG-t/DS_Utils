@@ -750,25 +750,32 @@ def calc_topic_sim(model):
     return topic_sim
 
 
-# score = combination of topic_similarities and keywords_entropy
-def score(topics_frequencies, topic_sim):
-    topics = list(topics_frequencies.keys())
-    values = list(topics_frequencies.values())
+# # score = combination of topic_similarities and keywords_entropy
+# def score(topics_frequencies, topic_sim):
+#     topics = list(topics_frequencies.keys())
+#     values = list(topics_frequencies.values())
 
-    if len(topics) == 0:
-        return 0
-    elif len(topics) == 1:
-        topic_similarities = max([max(topic_sim[t].values()) for t in topic_sim]) #max existing value
-    else:
-        topic_similarities = np.mean([topic_sim[t1][t2] for t1 in topics for t2 in topics if t1 != t2])
+#     if len(topics) == 0:
+#         return 0
+#     elif len(topics) == 1:
+#         topic_similarities = max([max(topic_sim[t].values()) for t in topic_sim]) #max existing value
+#     else:
+#         topic_similarities = np.mean([topic_sim[t1][t2] for t1 in topics for t2 in topics if t1 != t2])
 
-    return topic_similarities * entropy(values)
+#     return topic_similarities * entropy(values)
 
 
-def entropy(arr):
-    if [arr[0]] * len(arr) == arr:
-        return 1.5/np.sqrt(len(arr))
-    return np.std(arr)/np.sqrt(len(arr))
+# def entropy(arr):
+#     if [arr[0]] * len(arr) == arr:
+#         return 1.5/np.sqrt(len(arr))
+#     return np.std(arr)/np.sqrt(len(arr))
+
+
+
+def score(f_ass, threshold=0.15):
+    f_rel = [x/np.sum(f_ass) for x in f_ass]
+    scores = [f_ass[i] * f_rel[i] for i in range(len(f_ass)) if f_rel[i] >= threshold]
+    return np.sum(scores) / 10
 
 
 def flatten(arr):
