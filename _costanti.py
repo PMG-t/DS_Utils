@@ -63,9 +63,8 @@ _TOPIC['cold'] = ['cold', 'snow', 'freeze', 'ice', 'hailstorm', 'frost', 'avalan
 
 _TOPIC['hot'] = ['hot', 'sun', 'sweat', 'torrid', 'warm', 'dry', 'drought', 'summer']
 
-_TOPIC['transportation'] = ['car', 'helicopter', 'taxi', 'plane', 'airplane', 'bus', 'bike', 'skateboard', 'bicycle',
-                            'subway', 'transit', 'transportation', 'highway', 'aviation', 'airline', 'truck', 'motorcycle',
-                            'suv', 'train','boat', 'biking', 'pullman', 'funicular', 'gondola', 'pilot']
+_TOPIC['public_transportation'] = ['taxi', 'plane', 'airplane', 'bus', 'subway', 'aviation', 'airline', 'train', 
+                                   'boat', 'pullman', 'funicular', 'gondola']
 
 _TOPIC['environment'] = ['ecology', 'sustainability', 'organic', 'renewable', 'ecological', 'biodegradable', 'recyclable',
                          'environmental', 'atmosphere', 'environment', 'ecosystem', 'agronomy', 'agroforestry', 'biosphere',
@@ -147,7 +146,7 @@ _COLOR['music'] = (255,168,187)
 _COLOR['crime'] = (255,0,16)
 _COLOR['cold'] = (94,241,242)
 _COLOR['sport'] = (0,153,143)
-_COLOR['transportation'] = (153,0,0)
+_COLOR['public_transportation'] = (153,0,0)
 _COLOR['history'] = (247,226,32)
 _COLOR['hot'] = (255,80,5)
 _COLOR['fashion'] = (190, 88, 245)
