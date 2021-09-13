@@ -30,6 +30,10 @@ _CITIES['south_america'] = ['bogota', 'caracas', 'lima', 'brasilia', 'quito', 'm
 _TOT_CITIES = [item for sublist in list(_CITIES.values()) for item in sublist]
 
 
+_REVERSE_CITIES = {}
+for continent in _CITIES:
+    _REVERSE_CITIES.update({city: continent for city in _CITIES[continent]})
+
 
 # -----------------------------
 
@@ -128,25 +132,34 @@ for topic in _TOPIC:
 
 
 
-_COLOR = {}
-_COLOR['fitness'] = (240,163,255)
-_COLOR['nightlife'] = (0,117,220)
-_COLOR['alcohol'] = (153,63,0)
-_COLOR['gambling'] = (76,0,92)
-_COLOR['pollution'] = (25,25,25)
-_COLOR['vegetation'] = (0,92,49)
-_COLOR['environment'] = (43,206,72)
-_COLOR['animals'] = (255,204,153)
-_COLOR['work'] = (128,128,128)
-_COLOR['professions'] = (143,124,0)
-_COLOR['education'] = (157,204,0)
-_COLOR['sport'] = (194,0,136)
-_COLOR['food'] = (255,164,5)
-_COLOR['music'] = (255,168,187)
-_COLOR['crime'] = (255,0,16)
-_COLOR['cold'] = (94,241,242)
-_COLOR['sport'] = (0,153,143)
-_COLOR['public_transportation'] = (153,0,0)
-_COLOR['history'] = (247,226,32)
-_COLOR['hot'] = (255,80,5)
-_COLOR['fashion'] = (190, 88, 245)
+_TOPIC_COLOR = {}
+_TOPIC_COLOR['fitness'] = (240,163,255)
+_TOPIC_COLOR['nightlife'] = (0,117,220)
+_TOPIC_COLOR['alcohol'] = (153,63,0)
+_TOPIC_COLOR['gambling'] = (76,0,92)
+_TOPIC_COLOR['pollution'] = (25,25,25)
+_TOPIC_COLOR['vegetation'] = (0,92,49)
+_TOPIC_COLOR['environment'] = (43,206,72)
+_TOPIC_COLOR['animals'] = (255,204,153)
+_TOPIC_COLOR['work'] = (128,128,128)
+_TOPIC_COLOR['professions'] = (143,124,0)
+_TOPIC_COLOR['education'] = (157,204,0)
+_TOPIC_COLOR['sport'] = (194,0,136)
+_TOPIC_COLOR['food'] = (255,164,5)
+_TOPIC_COLOR['music'] = (255,168,187)
+_TOPIC_COLOR['crime'] = (255,0,16)
+_TOPIC_COLOR['cold'] = (94,241,242)
+_TOPIC_COLOR['sport'] = (0,153,143)
+_TOPIC_COLOR['public_transportation'] = (153,0,0)
+_TOPIC_COLOR['history'] = (247,226,32)
+_TOPIC_COLOR['hot'] = (255,80,5)
+_TOPIC_COLOR['fashion'] = (190, 88, 245)
+
+
+_CITY_COLOR = {}
+_CITY_COLOR['asia'] = (245, 239, 66)
+_CITY_COLOR['africa'] = (115, 75, 23)
+_CITY_COLOR['australia'] = (5, 100, 242)
+_CITY_COLOR['europe'] = (17, 133, 50)
+_CITY_COLOR['north_america'] = (247, 32, 54)
+_CITY_COLOR['south_america'] = (32, 179, 179)

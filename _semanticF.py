@@ -18,6 +18,7 @@ from more_itertools import split_at
 from pathlib import Path
 from fastcluster import linkage
 from termcolor import colored
+from wordcloud import WordCloud
 from sklearn.cluster import DBSCAN
 from gensim.models import Word2Vec
 from gensim.models.phrases import Phrases, Phraser
@@ -750,28 +751,8 @@ def calc_topic_sim(model):
     return topic_sim
 
 
-# # score = combination of topic_similarities and keywords_entropy
-# def score(topics_frequencies, topic_sim):
-#     topics = list(topics_frequencies.keys())
-#     values = list(topics_frequencies.values())
-
-#     if len(topics) == 0:
-#         return 0
-#     elif len(topics) == 1:
-#         topic_similarities = max([max(topic_sim[t].values()) for t in topic_sim]) #max existing value
-#     else:
-#         topic_similarities = np.mean([topic_sim[t1][t2] for t1 in topics for t2 in topics if t1 != t2])
-
-#     return topic_similarities * entropy(values)
-
-
-# def entropy(arr):
-#     if [arr[0]] * len(arr) == arr:
-#         return 1.5/np.sqrt(len(arr))
-#     return np.std(arr)/np.sqrt(len(arr))
-
-
-
+# assumo che topic non definisce una città se ha meno del 15% delle parole mostrate
+# fa combinazione lineare di frequenze assolute e relative dei topic rimanenti
 def score(f_ass, threshold=0.15):
     f_rel = [x/np.sum(f_ass) for x in f_ass]
     scores = [f_ass[i] * f_rel[i] for i in range(len(f_ass)) if f_rel[i] >= threshold]
@@ -801,3 +782,32 @@ def rescale(lst, NewMin, NewMax):
 def rescale_dict(diz, min, max):
     tmp = rescale([v+1 for v in diz.values()],min,max)
     return {k:tmp[i] for i,k in enumerate(diz.keys())}
+
+
+def plot_wordcloud(words_frequencies, size=(300, 300), fig_size=(5,5), max_font_size=40, 
+                   background_color='white', mask_path=None, color='topic'): 
+    
+    if color == 'topic':
+        col_func = lambda *args, **kwargs: C._TOPIC_COLOR[C._REVERSE_TOPIC[args[0]]]
+    elif color == 'city':
+        col_func = lambda *args, **kwargs: C._CITY_COLOR[C._REVERSE_CITIES[args[0]]]
+    else:
+        col_func = None
+    
+    mask = None
+    if mask_path is not None:
+        mask = np.array(Image.open(mask_path))
+        
+    wc = WordCloud(width = size[0], 
+                   height = size[1], 
+                   max_font_size = max_font_size, 
+                   background_color = background_color, 
+                   color_func = col_func, 
+                   mask = mask)
+    wc.generate_from_frequencies(words_frequencies)
+    
+    plt.figure(figsize=fig_size)
+    plt.imshow(wc, interpolation="bilinear")
+    plt.axis("off")
+    plt.figure()
+    plt.show()
