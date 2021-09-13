@@ -12,11 +12,7 @@ def city_cohesion(rw_city, reverse_topic, topic_sim):
     # text = {x[0]: x[1] for x in rw_city}
     topic_count = dict(Counter([reverse_topic[t] for t in rw_city]))
     return s.score(topic_count, topic_sim)
-
-
-# def flatten(t):
-#     return [item for sublist in t for item in sublist]
-
+    
 
 def get_common_words(rw, _cities, max_words):
     matrix = common_words_matrix(rw, _cities)

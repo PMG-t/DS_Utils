@@ -794,3 +794,7 @@ def rescale(lst, NewMin, NewMax):
 def rescale_dict(diz, min, max):
     tmp = rescale([v+1 for v in diz.values()],min,max)
     return {k:tmp[i] for i,k in enumerate(diz.keys())}
+
+def gcorr_dict(diz, g):
+    tmp = gcorr(list(diz.values()), g)
+    return {k:tmp[i] for i,k in enumerate(diz.keys())}
