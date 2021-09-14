@@ -793,6 +793,9 @@ def gcorr(lst, g):
     m = max(lst)
     return [math.pow((v/m),g)*m for v in lst]
 
+def exp(x,e=math.e):
+    return math.pow(e,x)
+
 def rescale(lst, NewMin, NewMax):
     OldMin = min(lst)
     OldMax = max(lst)
@@ -805,3 +808,6 @@ def rescale_dict(diz, min, max):
 def gcorr_dict(diz, g):
     tmp = gcorr(list(diz.values()), g)
     return {k:tmp[i] for i,k in enumerate(diz.keys())}
+
+
+##dict(Counter([c._REVERSE_TOPIC[t] for t in rw[city]]))
