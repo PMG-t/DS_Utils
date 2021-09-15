@@ -19,6 +19,7 @@ from pathlib import Path
 from fastcluster import linkage
 from termcolor import colored
 from wordcloud import WordCloud
+from PIL import Image
 from sklearn.cluster import DBSCAN
 from gensim.models import Word2Vec
 from gensim.models.phrases import Phrases, Phraser
@@ -811,3 +812,37 @@ def plot_wordcloud(words_frequencies, size=(300, 300), fig_size=(5,5), max_font_
     plt.axis("off")
     plt.figure()
     plt.show()
+
+
+def get_questions(filename):
+    f = open(filename, 'r')
+    q = f.read()
+    f.close()
+    q = q.split(':')[1:]
+    q = [x.split('\n') for x in q]
+    q = {x[0].strip(): x[1:] for x in q}
+    for k in q:
+        q[k] = [[word.lower() for word in row.split(' ')] for row in q[k] if row != '']
+    for k in ['gram3-comparative', 'gram4-superlative', 'gram7-past-tense', 'gram8-plural', 'gram9-plural-verbs']:
+        del q[k]
+    return q
+
+
+def calc_accuracy(model, q):
+    accuracy = []
+    
+    for category in q:
+        correct = 0
+        count = 0
+        for question in q[category]:
+            count += 1
+            try:
+                result = model.wv.most_similar(positive=[question[1], question[2]], negative=[question[0]])
+                if result[0][0] == question[3]:
+                    correct += 1
+            except:
+                pass
+        accuracy.append([category, correct, count, correct/count])
+        print('DONE', category)
+
+    return pd.DataFrame(accuracy, columns=['category', 'correct', 'count', 'ratio'])

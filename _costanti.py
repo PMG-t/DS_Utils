@@ -18,11 +18,11 @@ _CITIES['europe'] = ['london', 'cardiff', 'belfast', 'edinburgh', 'dublin', 'bir
                     'tirana', 'bucharest', 'vilnius', 'riga', 'reykjavik', 'bratislava', 'luxembourg']
 
 _CITIES['north_america'] = ['new_york', 'los_angeles', 'chicago', 'houston', 'phoenix', 'philadelphia',
-                           'san_antonio', 'san_diego', 'dallas', 'san_jose', 'austin', 'jacksonville',
-                           'fort_worth', 'indianapolis', 'columbus', 'charlotte', 'san_francisco', 'seattle',
-                           'denver', 'washington', 'nashville', 'el_paso', 'boston', 'portland', 'detroit',
-                           'memphis', 'kansas_city', 'new_orleans', 'miami', 'honolulu', 'ottawa', 'toronto',
-                           'montreal', 'vancouver', 'havana', 'la_vegas']
+                           'san_antonio', 'san_diego', 'dallas', 'austin', 'jacksonville', 'fort_worth', 
+                           'indianapolis', 'charlotte', 'san_francisco', 'seattle', 'denver', 'washington', 
+                           'nashville', 'el_paso', 'boston', 'portland', 'detroit', 'memphis', 'kansas_city', 
+                           'new_orleans', 'miami', 'honolulu', 'ottawa', 'toronto', 'montreal', 'vancouver', 
+                           'havana', 'la_vegas']
 
 _CITIES['south_america'] = ['bogota', 'caracas', 'lima', 'brasilia', 'quito', 'montevideo', 'buenos_aires',
                            'la_paz', 'sao_paulo', 'santiago_chile', 'rio_janeiro']
@@ -71,8 +71,7 @@ _TOPIC['public_transportation'] = ['taxi', 'plane', 'airplane', 'bus', 'subway',
                                    'boat', 'pullman', 'funicular', 'gondola']
 
 _TOPIC['environment'] = ['ecology', 'sustainability', 'organic', 'renewable', 'ecological', 'biodegradable', 'recyclable',
-                         'environmental', 'atmosphere', 'environment', 'ecosystem', 'agronomy', 'agroforestry', 'biosphere',
-                         'bio', 'biological']
+                         'atmosphere', 'environment', 'ecosystem', 'agronomy', 'agroforestry', 'biosphere', 'bio', 'biological']
 
 _TOPIC['pollution'] = ['pollution', 'waste', 'toxic', 'toxin', 'impurity', 'contaminant', 'contamination', 'foulness',
                        'smog', 'dioxide', 'sulfur', 'emission', 'eutrophication', 'deforestation']
