@@ -830,16 +830,17 @@ def get_questions(filename):
 
 def calc_accuracy(model, q):
     accuracy = []
-    
+    topn = 10
+
     for category in q:
         correct = 0
         count = 0
         for question in q[category]:
             count += 1
             try:
-                result = model.wv.most_similar(positive=[question[1], question[2]], negative=[question[0]])
-                if result[0][0] == question[3]:
-                    correct += 1
+                result = model.wv.most_similar(positive=[question[1], question[2]], negative=[question[0]], topn=topn)
+                result = [r[0] for r in result]
+                correct += 1 - result.index(question[3]) / topn
             except:
                 pass
         accuracy.append([category, correct, count, correct/count])

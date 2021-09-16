@@ -1,17 +1,17 @@
 _CITIES = {}
 
 _CITIES['africa'] = ['kinshasa', 'lagos', 'cairo', 'giza', 'johannesburg', 'rabat', 'casablanca', 'dakar',
-                    'nairobi', 'capetown', 'tripoli']
+                    'nairobi', 'capetown', 'tripoli', 'luanda', 'addis_ababa']
 
 _CITIES['asia'] = ['tokyo', 'delhi', 'shanghai', 'dhaka', 'mumbai', 'beijing', 'osaka', 'seoul', 'istanbul',
                   'islamabad', 'bangkok', 'singapore', 'jakarta', 'dubai', 'baghdad', 'kabul', 'pyongyang',
-                  'ulaanbaatar', 'kathmandu']
+                  'ulaanbaatar', 'kathmandu', 'tehran', 'hanoi']
 
 _CITIES['australia'] = ['melbourne', 'sydney', 'perth', 'wellington']
 
 _CITIES['europe'] = ['london', 'cardiff', 'belfast', 'edinburgh', 'dublin', 'birmingham', 'leeds', 'glasgow',
                     'sheffield', 'berlin', 'hamburg', 'munich', 'frankfurt', 'stuttgart', 'rome', 'milan',
-                    'florence', 'naples', 'turin', 'messina', 'bologna', 'madrid', 'barcelona',
+                    'florence', 'naples', 'turin', 'messina', 'bologna', 'madrid', 'barcelona', 'zurich', 
                     'paris', 'lyon', 'marseille', 'toulouse', 'moscow', 'saint_petersburg', 'krakow',
                     'warsaw', 'lisbon', 'porto', 'amsterdam', 'stockholm', 'belgrade', 'vienna', 'oslo',
                     'budapest', 'copenhagen', 'athens', 'helsinki', 'tallinn', 'kyiv', 'prague', 'brussels',
@@ -112,6 +112,9 @@ _TOPIC['sport'] = ['soccer', 'football', 'basketball', 'volleyball', 'golf', 'ba
 _TOPIC['fashion'] = ['hairdresser', 'hairstylist', 'stylist', 'manicure', 'pedicure', 'makeup', 'lipstick', 'mascara',
                      'eyeliner', 'nail_polish', 'tailor']
 
+_TOPIC['tech'] = ['laptop', 'technology', 'smartphone', 'digital', 'television', 'computer', 'server', 'headphone', 
+                  'monitor', 'start_up', 'wireless', 'software', 'hardware', 'ebook']
+
 # _TOPIC['professions'] = ['fireman', 'journalist', 'lawyer', 'mason', 'mechanic', 'plumber', 'policeman', 'postman', 'soldier',
 #                          'taxi_driver', 'waiter', 'engineer', 'doctor', 'nurse', 'goldsmith', 'actor', 'cleaner', 'author',
 #                          'astronomer', 'architect', 'dentist', 'designer', 'electrician', 'judge', 'librarian', 'lifeguard',
@@ -132,27 +135,28 @@ for topic in _TOPIC:
 
 
 _TOPIC_COLOR = {}
-_TOPIC_COLOR['fitness'] = (240,163,255)
-_TOPIC_COLOR['nightlife'] = (0,117,220)
-_TOPIC_COLOR['alcohol'] = (153,63,0)
-_TOPIC_COLOR['gambling'] = (76,0,92)
-_TOPIC_COLOR['pollution'] = (25,25,25)
-_TOPIC_COLOR['vegetation'] = (0,92,49)
-_TOPIC_COLOR['environment'] = (43,206,72)
-_TOPIC_COLOR['animals'] = (255,204,153)
-_TOPIC_COLOR['work'] = (128,128,128)
-_TOPIC_COLOR['professions'] = (143,124,0)
-_TOPIC_COLOR['education'] = (157,204,0)
-_TOPIC_COLOR['sport'] = (194,0,136)
-_TOPIC_COLOR['food'] = (255,164,5)
-_TOPIC_COLOR['music'] = (255,168,187)
-_TOPIC_COLOR['crime'] = (255,0,16)
-_TOPIC_COLOR['cold'] = (94,241,242)
-_TOPIC_COLOR['sport'] = (0,153,143)
-_TOPIC_COLOR['public_transportation'] = (153,0,0)
-_TOPIC_COLOR['history'] = (247,226,32)
-_TOPIC_COLOR['hot'] = (255,80,5)
+_TOPIC_COLOR['fitness'] = (240, 163, 255)
+_TOPIC_COLOR['nightlife'] = (0, 117, 220)
+_TOPIC_COLOR['alcohol'] = (153, 63, 0)
+_TOPIC_COLOR['gambling'] = (76, 0, 92)
+_TOPIC_COLOR['pollution'] = (25, 25, 25)
+_TOPIC_COLOR['vegetation'] = (0, 92, 49)
+_TOPIC_COLOR['environment'] = (43, 206, 72)
+_TOPIC_COLOR['animals'] = (255, 204, 153)
+_TOPIC_COLOR['work'] = (128, 128, 128)
+_TOPIC_COLOR['professions'] = (143, 124, 0)
+_TOPIC_COLOR['education'] = (157, 204, 0)
+_TOPIC_COLOR['sport'] = (194, 0, 136)
+_TOPIC_COLOR['food'] = (255, 164, 5)
+_TOPIC_COLOR['music'] = (255, 168, 187)
+_TOPIC_COLOR['crime'] = (255, 0, 16)
+_TOPIC_COLOR['cold'] = (94, 241, 242)
+_TOPIC_COLOR['sport'] = (0, 153, 143)
+_TOPIC_COLOR['public_transportation'] = (153, 0, 0)
+_TOPIC_COLOR['history'] = (247, 226, 32)
+_TOPIC_COLOR['hot'] = (255, 80, 5)
 _TOPIC_COLOR['fashion'] = (190, 88, 245)
+_TOPIC_COLOR['tech'] = (235, 152, 52)
 
 
 _CITY_COLOR = {}
