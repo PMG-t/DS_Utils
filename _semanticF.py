@@ -821,10 +821,10 @@ def get_questions(filename):
     q = q.split(':')[1:]
     q = [x.split('\n') for x in q]
     q = {x[0].strip(): x[1:] for x in q}
-    for k in q:
-        q[k] = [[word.lower() for word in row.split(' ')] for row in q[k] if row != '']
     for k in ['gram3-comparative', 'gram4-superlative', 'gram7-past-tense', 'gram8-plural', 'gram9-plural-verbs']:
         del q[k]
+    for k in q:
+        q[k] = [[word.lower() for word in row.split(' ')] for row in q[k] if row != '']
     return q
 
 

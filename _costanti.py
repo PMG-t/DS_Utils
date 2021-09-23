@@ -156,7 +156,7 @@ _TOPIC_COLOR['public_transportation'] = (153, 0, 0)
 _TOPIC_COLOR['history'] = (247, 226, 32)
 _TOPIC_COLOR['hot'] = (255, 80, 5)
 _TOPIC_COLOR['fashion'] = (190, 88, 245)
-_TOPIC_COLOR['tech'] = (235, 152, 52)
+_TOPIC_COLOR['tech'] = (103, 70, 115)
 
 
 _CITY_COLOR = {}
