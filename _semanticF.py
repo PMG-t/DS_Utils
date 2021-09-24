@@ -861,17 +861,18 @@ def filter_country(model, df, country, min_pop, max_count, min_sim):
     return cities[:max_count]
 
 
-def get_cities(model, min_pop=300000, max_count=15, min_sim=0.15, flat=False, coords=False):
+def get_cities(model, min_pop=300000, max_count=15, min_sim=0.15, flat=False, show_coords=False):
     df = pd.read_csv(_PATHS._BASE_DIR + 'wcities_coords.csv')
     df['coords'] = list(zip(df.lat, df.lng))
     coords = df[['name', 'coords']].set_index('name').to_dict()['coords']
 
     cities = {c: filter_country(model, df, c, min_pop, max_count, min_sim) for c in set(df['country'])}
     cities = {k: v for k,v in cities.items() if v} #remove empty lists
-    if coords:
+    
+    if show_coords:
         cities = {k: {city: coords[city] for city in v} for k,v in cities.items()}
     if flat:
-        if coords:
+        if show_coords:
             cities = {k: v for d in list(cities.values()) for k, v in d.items()}
         else:
             cities = flatten(list(cities.values()))
