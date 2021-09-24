@@ -10,6 +10,7 @@ import scipy
 import heapq
 import pickle
 import zipfile
+import unidecode
 import numpy as np
 import pandas as pd
 import seaborn as sns
@@ -847,3 +848,31 @@ def calc_accuracy(model, q):
         print('DONE', category)
 
     return pd.DataFrame(accuracy, columns=['category', 'correct', 'count', 'ratio'])
+
+
+def normalize_text(t):
+    return unidecode.unidecode(t.lower().replace(' ', '_').replace('-', '_'))
+
+
+def filter_country(model, df, country, min_pop, max_count, min_sim):
+    df = df[(df['country']==country) & (df['population']>=min_pop)]
+    cities = [c for c in list(df['name']) if c in model.wv and country in model.wv and 
+              1-model.wv.distance(country, c) > min_sim]
+    return cities[:max_count]
+
+
+def get_cities(model, min_pop=300000, max_count=15, min_sim=0.15, flat=False, coords=False):
+    df = pd.read_csv(_PATHS._BASE_DIR + 'wcities_coords.csv')
+    df['coords'] = list(zip(df.lat, df.lng))
+    coords = df[['name', 'coords']].set_index('name').to_dict()['coords']
+
+    cities = {c: filter_country(model, df, c, min_pop, max_count, min_sim) for c in set(df['country'])}
+    cities = {k: v for k,v in cities.items() if v} #remove empty lists
+    if coords:
+        cities = {k: {city: coords[city] for city in v} for k,v in cities.items()}
+    if flat:
+        if coords:
+            cities = {k: v for d in list(cities.values()) for k, v in d.items()}
+        else:
+            cities = flatten(list(cities.values()))
+    return cities
