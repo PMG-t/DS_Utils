@@ -10,6 +10,7 @@ import scipy
 import heapq
 import pickle
 import zipfile
+import unidecode
 import numpy as np
 import pandas as pd
 import seaborn as sns
@@ -19,6 +20,7 @@ from pathlib import Path
 from fastcluster import linkage
 from termcolor import colored
 from wordcloud import WordCloud
+from PIL import Image
 from sklearn.cluster import DBSCAN
 from gensim.models import Word2Vec
 from gensim.models.phrases import Phrases, Phraser
@@ -864,3 +866,65 @@ def describe_df(df, x='weight', exclude_0=False, print_res=True, print_plot=True
         sns.displot(dfx, kde=True, hue=hue).set(title=title)
         #sns.set(rc={'figure.figsize':_fig_size})
     return drt
+
+def get_questions(filename):
+    f = open(filename, 'r')
+    q = f.read()
+    f.close()
+    q = q.split(':')[1:]
+    q = [x.split('\n') for x in q]
+    q = {x[0].strip(): x[1:] for x in q}
+    for k in ['gram3-comparative', 'gram4-superlative', 'gram7-past-tense', 'gram8-plural', 'gram9-plural-verbs']:
+        del q[k]
+    for k in q:
+        q[k] = [[word.lower() for word in row.split(' ')] for row in q[k] if row != '']
+    return q
+
+
+def calc_accuracy(model, q):
+    accuracy = []
+    topn = 10
+
+    for category in q:
+        correct = 0
+        count = 0
+        for question in q[category]:
+            count += 1
+            try:
+                result = model.wv.most_similar(positive=[question[1], question[2]], negative=[question[0]], topn=topn)
+                result = [r[0] for r in result]
+                correct += 1 - result.index(question[3]) / topn
+            except:
+                pass
+        accuracy.append([category, correct, count, correct/count])
+        print('DONE', category)
+
+    return pd.DataFrame(accuracy, columns=['category', 'correct', 'count', 'ratio'])
+
+
+def normalize_text(t):
+    return unidecode.unidecode(t.lower().replace(' ', '_').replace('-', '_'))
+
+
+def filter_country(model, df, country, min_pop, max_count, min_sim):
+    df = df[(df['country']==country) & (df['population']>=min_pop)]
+    cities = [c for c in list(df['name']) if c in model.wv and country in model.wv and
+              1-model.wv.distance(country, c) > min_sim]
+    return cities[:max_count]
+
+
+def get_cities(model, min_pop=300000, max_count=15, min_sim=0.15, flat=False, coords=False):
+    df = pd.read_csv(_PATHS._BASE_DIR + 'wcities_coords.csv')
+    df['coords'] = list(zip(df.lat, df.lng))
+    coords = df[['name', 'coords']].set_index('name').to_dict()['coords']
+
+    cities = {c: filter_country(model, df, c, min_pop, max_count, min_sim) for c in set(df['country'])}
+    cities = {k: v for k,v in cities.items() if v} #remove empty lists
+    if coords:
+        cities = {k: {city: coords[city] for city in v} for k,v in cities.items()}
+    if flat:
+        if coords:
+            cities = {k: v for d in list(cities.values()) for k, v in d.items()}
+        else:
+            cities = flatten(list(cities.values()))
+    return cities
