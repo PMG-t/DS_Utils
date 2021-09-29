@@ -560,9 +560,10 @@ def dm_cluster(dist_matrix, elements, eps='auto', min_samples=2):
         except:
             print(i,l,elements)
     for c in list(cluster.keys()):
-        num_score = len(cluster[c]['words'])/len(elements)
+        rfreq = len(cluster[c]['words'])/len(elements)
+        rfreq_noout = len(cluster[c]['words'])/(len(elements)-(0 if -1 not in cluster else len(cluster[-1]['words']))) if (len(elements)-(0 if -1 not in cluster else len(cluster[-1]['words'])))>0 else 0
         cho_score = wchoesion(cluster[c]['words'], gamma=1)
-        cluster[c]['score'] = {'pdim': num_score, 'choesion':cho_score}
+        cluster[c]['score'] = {'rfreq': rfreq, 'rfreq_noout':rfreq_noout, 'choesion':cho_score}
     out['cluster'] = cluster
     return out
 
@@ -620,13 +621,16 @@ def select(df, cts={}):
             dfout = n_select(dfout, ccol, cval).copy()
     return dfout
 
-def normalize(values, method='max-min'):
-    try:
-        minv = min(list(filter(lambda x: x > 0, values)))
-        maxv = max(list(filter(lambda x: x < 1, values)))
-    except:
-        minv = min(values)
-        maxv = max(values)
+def normalize(values, method='max-min', exclude_01=False):
+    minv = min(values)
+    maxv = max(values)
+    if exclude_01:
+        try:
+            minv = min(list(filter(lambda x: x > 0, values)))
+            maxv = max(list(filter(lambda x: x < 1, values)))
+        except:
+            minv = min(values)
+            maxv = max(values)
     if method=='max-min':
         return [((v-minv) / (maxv-minv)) if v!=0 and v!=1 else v for v in values]
 
@@ -776,6 +780,9 @@ def gcorr(lst, g):
     m = max(lst)
     return [math.pow((v/m),g)*m for v in lst]
 
+def exp(x,e=math.e):
+    return math.pow(e,x)
+
 def rescale(lst, NewMin, NewMax):
     OldMin = min(lst)
     OldMax = max(lst)
@@ -785,35 +792,80 @@ def rescale_dict(diz, min, max):
     tmp = rescale([v+1 for v in diz.values()],min,max)
     return {k:tmp[i] for i,k in enumerate(diz.keys())}
 
+def gcorr_dict(diz, g):
+    tmp = gcorr(list(diz.values()), g)
+    return {k:tmp[i] for i,k in enumerate(diz.keys())}
 
-def plot_wordcloud(words_frequencies, size=(300, 300), fig_size=(5,5), max_font_size=40, 
-                   background_color='white', mask_path=None, color='topic'): 
-    
+def rgb2hex(rgb_tuple):
+    return '#%02x%02x%02x' % rgb_tuple
+
+
+def plot_wordcloud(words_frequencies, size=(300, 300), fig_size=(5,5), max_font_size=40,
+                   background_color='white', mask_path=None, color='topic'):
+
     if color == 'topic':
         col_func = lambda *args, **kwargs: C._TOPIC_COLOR[C._REVERSE_TOPIC[args[0]]]
     elif color == 'city':
         col_func = lambda *args, **kwargs: C._CITY_COLOR[C._REVERSE_CITIES[args[0]]]
     else:
         col_func = None
-    
+
     mask = None
     if mask_path is not None:
         mask = np.array(Image.open(mask_path))
-        
-    wc = WordCloud(width = size[0], 
-                   height = size[1], 
-                   max_font_size = max_font_size, 
-                   background_color = background_color, 
-                   color_func = col_func, 
+
+    wc = WordCloud(width = size[0],
+                   height = size[1],
+                   max_font_size = max_font_size,
+                   background_color = background_color,
+                   color_func = col_func,
                    mask = mask)
     wc.generate_from_frequencies(words_frequencies)
-    
+
     plt.figure(figsize=fig_size)
     plt.imshow(wc, interpolation="bilinear")
     plt.axis("off")
     plt.figure()
     plt.show()
 
+def describe(values, exclude_0=False, print_res=True, print_plot=True, hue=None, colors=None, over=False, fsize=None, title=''):
+    return describe_df(pd.DataFrame(values, columns=['values']), x='values', exclude_0=exclude_0, print_res=print_res, print_plot=print_plot, hue=hue, colors=colors, over=over, fsize=fsize, title=title)
+
+def describe_df(df, x='weight', exclude_0=False, print_res=True, print_plot=True, hue=None, colors=None, over=False, fsize=None, title=''):
+    dfx = df[x] if not exclude_0 else select(df, {x:['!',0]})[x]
+    drs = scipy.stats.describe(dfx)
+    values = pd.Series([np.int64(v) for v in list(dfx)])
+    drp = dict(values.describe())
+    drt = { 'n obs':  drs[0],
+            'values': dfx,
+            'mean':  drs[2],
+            'variance':  drs[3],
+            'std':  drp['std'] if 'std'in list(drp.keys()) else 'NaN',
+            'min':  drp['min'] if 'min'in list(drp.keys()) else 'NaN',
+            'q25':  drp['25%'] if '25%'in list(drp.keys()) else 'NaN',
+            'q50':  drp['50%'] if '50%'in list(drp.keys()) else 'NaN',
+            'q75':  drp['75%'] if '75%'in list(drp.keys()) else 'NaN',
+            'max':  drp['max'] if 'max'in list(drp.keys()) else 'NaN',
+            'range':  drp['max']-drp['min'] if 'max' in list(drp.keys()) else 'NaN',
+            'skewness':  drs[4],
+            'kurtosis':  drs[5]}
+    if print_res:
+        print('# Describe variable: ' + x + '\n')
+        [print('• ' + r + ' :   ' + str(drt[r])) for r in drt if r !='values']
+        print('\n')
+    if print_plot:
+        if not over:
+            plt.figure()
+        if hue != None:
+            df = df.sort_values(hue)
+            values = pd.Series([np.int64(v) for v in list(dfx)])
+            hue = [str(v) for v in list(df[hue])]
+        # palette = _plot_colorp if not colors else colors
+        # fsize = fsize if fsize!=None else _SNS_FIG_SIZE
+        # sns.displot(x=values, kde=True, hue=hue, palette=palette, aspect=(fsize[0]/fsize[1]), element="step").set(title=title)
+        sns.displot(dfx, kde=True, hue=hue).set(title=title)
+        #sns.set(rc={'figure.figsize':_fig_size})
+    return drt
 
 def get_questions(filename):
     f = open(filename, 'r')
@@ -856,7 +908,7 @@ def normalize_text(t):
 
 def filter_country(model, df, country, min_pop, max_count, min_sim):
     df = df[(df['country']==country) & (df['population']>=min_pop)]
-    cities = [c for c in list(df['name']) if c in model.wv and country in model.wv and 
+    cities = [c for c in list(df['name']) if c in model.wv and country in model.wv and
               1-model.wv.distance(country, c) > min_sim]
     return cities[:max_count]
 

@@ -11,17 +11,17 @@ _CITIES['australia'] = ['melbourne', 'sydney', 'perth', 'wellington']
 
 _CITIES['europe'] = ['london', 'cardiff', 'belfast', 'edinburgh', 'dublin', 'birmingham', 'leeds', 'glasgow',
                     'sheffield', 'berlin', 'hamburg', 'munich', 'frankfurt', 'stuttgart', 'rome', 'milan',
-                    'florence', 'naples', 'turin', 'messina', 'bologna', 'madrid', 'barcelona', 'zurich', 
+                    'florence', 'naples', 'turin', 'messina', 'bologna', 'madrid', 'barcelona', 'zurich',
                     'paris', 'lyon', 'marseille', 'toulouse', 'moscow', 'saint_petersburg', 'krakow',
                     'warsaw', 'lisbon', 'porto', 'amsterdam', 'stockholm', 'belgrade', 'vienna', 'oslo',
                     'budapest', 'copenhagen', 'athens', 'helsinki', 'tallinn', 'kyiv', 'prague', 'brussels',
                     'tirana', 'bucharest', 'vilnius', 'riga', 'reykjavik', 'bratislava', 'luxembourg']
 
 _CITIES['north_america'] = ['new_york', 'los_angeles', 'chicago', 'houston', 'phoenix', 'philadelphia',
-                           'san_antonio', 'san_diego', 'dallas', 'austin', 'jacksonville', 'fort_worth', 
-                           'indianapolis', 'charlotte', 'san_francisco', 'seattle', 'denver', 'washington', 
-                           'nashville', 'el_paso', 'boston', 'portland', 'detroit', 'memphis', 'kansas_city', 
-                           'new_orleans', 'miami', 'honolulu', 'ottawa', 'toronto', 'montreal', 'vancouver', 
+                           'san_antonio', 'san_diego', 'dallas', 'austin', 'jacksonville', 'fort_worth',
+                           'indianapolis', 'charlotte', 'san_francisco', 'seattle', 'denver', 'washington',
+                           'nashville', 'el_paso', 'boston', 'portland', 'detroit', 'memphis', 'kansas_city',
+                           'new_orleans', 'miami', 'honolulu', 'ottawa', 'toronto', 'montreal', 'vancouver',
                            'havana', 'la_vegas']
 
 _CITIES['south_america'] = ['bogota', 'caracas', 'lima', 'brasilia', 'quito', 'montevideo', 'buenos_aires',
@@ -52,8 +52,8 @@ _TOPIC['education'] = ['education', 'school', 'high_school', 'university', 'stud
                        'learning', 'university', 'schooling', 'literature', 'educational', 'knowledge', 'research',
                        'homework', 'degree', 'diploma']
 
-_TOPIC['food'] = ['food', 'restaurant', 'cuisine', 'chef', 'gourmet', 'meal', 'cooking', 'recipe', 'culinary', 'diner',
-                  'lunch', 'dinner', 'cafe', 'bistro', 'baking', 'foodstuff', 'meat', 'steakhouse', 'eatery', 'pizzeria',
+_TOPIC['food'] = ['restaurant', 'cuisine', 'chef', 'gourmet', 'meal', 'cooking', 'recipe', 'culinary', 'diner',
+                  'lunch', 'dinner', 'cafe', 'bistro', 'baking', 'foodstuff', 'meat', 'steakhouse', 'pizzeria',
                   'restaurateur', 'brasserie', 'chef', 'seafood', 'baker' , 'butcher']
 
 _TOPIC['work'] = ['job', 'work', 'salary', 'business', 'career', 'office', 'secretary', 'colleague', 'profession', 'industry',
@@ -67,7 +67,7 @@ _TOPIC['cold'] = ['cold', 'snow', 'freeze', 'ice', 'hailstorm', 'frost', 'avalan
 
 _TOPIC['hot'] = ['hot', 'sun', 'sweat', 'torrid', 'warm', 'dry', 'drought', 'summer']
 
-_TOPIC['public_transportation'] = ['taxi', 'plane', 'airplane', 'bus', 'subway', 'aviation', 'airline', 'train', 
+_TOPIC['transport'] = ['taxi', 'plane', 'airplane', 'bus', 'subway', 'aviation', 'airline', 'train',
                                    'boat', 'pullman', 'funicular', 'gondola']
 
 _TOPIC['environment'] = ['ecology', 'sustainability', 'organic', 'renewable', 'ecological', 'biodegradable', 'recyclable',
@@ -112,7 +112,7 @@ _TOPIC['sport'] = ['soccer', 'football', 'basketball', 'volleyball', 'golf', 'ba
 _TOPIC['fashion'] = ['hairdresser', 'hairstylist', 'stylist', 'manicure', 'pedicure', 'makeup', 'lipstick', 'mascara',
                      'eyeliner', 'nail_polish', 'tailor']
 
-_TOPIC['tech'] = ['laptop', 'technology', 'smartphone', 'digital', 'television', 'computer', 'server', 'headphone', 
+_TOPIC['tech'] = ['laptop', 'technology', 'smartphone', 'digital', 'television', 'computer', 'server', 'headphone',
                   'monitor', 'start_up', 'wireless', 'software', 'hardware', 'ebook']
 
 # _TOPIC['professions'] = ['fireman', 'journalist', 'lawyer', 'mason', 'mechanic', 'plumber', 'policeman', 'postman', 'soldier',
