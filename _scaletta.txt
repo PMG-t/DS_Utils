@@ -1,0 +1,239 @@
+###############################################################################
+
+Understanding society's perception of cities
+
+###############################################################################
+
+1. Overview and goal
+
+Tutte le città hanno caratteristiche che le definiscono: spesso la gente associa
+ad una città delle parole che la rappresentano, come la moda di Milano, il lusso
+di Dubai, l’emancipazione di Amsterdam. 
+
+Le percezioni possono spaziare su diversi ambiti e possono quindi essere più o 
+meno positive. Spesso convergono anche in stereotipi non necessariamente veritieri.
+
+Si vuole quindi analizzare come vengono percepite e dipinte le città dalla società,
+ed in particolare al collegamento tra esse, evidenziando cosa hanno in comune.
+
+--------------------------------------------------------------------------------
+
+2. Workflow
+
+- Individuazione del corpus
+- Descrizione, analisi e preprocessing del corpus → PoS, y_stop, lemmatization, bigrams
+- Costruzione modello e comparazione → cbow / skipgram, test analogie leonardo?
+- Step 1: Obiettivo estrarre per una città delle parole relative alle sue caratteristiche/fama
+  - L'idea è dividere le possibili caratteristiche in topic di appartenenza i quali 
+    sono identificati da parole chiave
+  - Metodo 1 - Supervised:
+    - Identificazione topic + parole chiave
+    - Algoritmo
+    - Risultati
+    - Pro / Contro
+  - Metodo 2 - Unsupervised:
+    - Identificazione topic + parole chiave
+    - Algoritmo 
+    - Risultati 
+    - Pro / Contro
+- Step 2: Rappresentazione dei risultati 
+  - WordCloud 
+    - risultati ottenuti da metodo 1 e 2
+  - Grafo → Frequenza Topic, Coesione, Connessione
+    - risultati ottenuti da metodo 1 e 2
+- Step 3: Interpretazione risultati
+  - Utilizzo di weat 
+    - Motivazione → disambiguazione forti collegamenti e/o paragoni soggettivi
+    - Definizione casi di utilizzo → environment / food / culture / ... ?
+    - Metodo 1 - Topic 
+      - Algoritmo
+    - Metodo 2 - Analogie
+      - Algoritmo
+    - Run test e confronto 
+- Risultati
+  - Recap di quello che abbiamo ottenuto, stereotipi
+  - Limiti
+- Conclusioni / Sviluppi futuri
+
+---------------------------------------------------------------------------------
+
+  ...
+
+---------------------------------------------------------------------------------
+
+Descrizione, analisi e preprocessing del corpus
+	Il corpus, per ogni sua categoria, oltre a presentare i testi in forma originale,
+	fornisce anche una trascrizione standardizzata, per la quale ogni vocabolo è ridotto
+	alla sua forma base, associando a questa un tag PoS che ne identifica l'analisi grammaticale.
+
+
+---------------------------------------------------------------------------------
+
+	...
+
+---------------------------------------------------------------------------------
+
+Metodo 2 - Unsupervised (cristo jupyter)
+
+1. Idea: 
+		Data una città (es: san paolo brazil) e un topic generico (es: crime o pollution),
+		si può possono formulare delle analogie per cercare di ottenere i riferimenti della
+		specifica città in quello specifico ambito.
+
+		es 1: 'city : crime = sao_paulo : x' 
+					→ 'violent_crime', 'homicide', 'perpetrator', 'carjacking', 'drug_trafficking',
+					 'drug_related', 'tribunal_hague', 'kidnapping', 'offender', 'commit_crime', 'robbery'
+		
+		es 1: 'city : pollution = sao_paulo : x' 
+					→ 'air_pollution', 'carbon_emission', 'emission', 'eutrophication', 'ozone_depletion', 
+					'ghg_emission', 'nitrogen_oxide', 'deforestation', 'sulfur_dioxide', 'agrochemical'
+
+2. Impostazione: 
+		definizione dei topic, e per ognuno di questi due o tre parole chiave che lo rappresentano:
+		{ 'crime': ['crime'],
+			'education': ['education','school'],
+			'food': ['food','recipe', 'alcohol'],
+			'sociality': ['politic','economy'],
+			'tourism': ['tourism','vacation'],
+			'environment': ['environment','pollution'],
+			'history': ['history','folklore'],
+			'culture': ['music','dance','art'],
+			'geo': ['vegetation','flora_fauna']	}
+
+3. Algoritmo:
+		- Raccolta parole:
+			Per ogni città, per ogni parola chiave di ciascun topic si ricavano tramite analogia 
+			le parole che dovrebbero rappresentare quella caratteristica in quella città.
+			
+			→ s.wanal('city : ' + keyword + ' = ' + city + ':x', thresh=0.3, topn=40)
+				- viene impostato un limite inferiore di similarità a 0.3, e ricavate le prime 40 parole
+				- causa merda vengono scartati ri siultati che non hanno diretta similarità con 
+					'keyword' e 'city' maggiore di 0.2
+
+		- Clustering parole:
+			L'insieme delle parole raccolte è numeroso e queste possono rigurardare diversi
+			aspetti dell'ambito indagato. Al fine successivo di osservare sia la coesione
+			interna di una città che il grado di similarità tra due di queste, può risultare
+			utile aggregare preventivamente la lista di termini ottenuti.
+
+			Viene applicato un clustering DBSCAN (Density-Based Spatial Clustering of Applications with Noise)
+			ponendo come input la matrice delle distanze tra le parole raccolte. [Fotina]
+			La scelta di DBSCAN sta nella di N di Noise, il metodo è di clustering parziale, parole quindi 
+			che non hanno nessi significativi con ognuna delle altre vengono scartate.
+
+			Impostazioni significative del clustering:
+			- eps: media(distance matrix) - std(distance matrix)
+			- min_samples: 2 
+
+			[Fotina set_prima → set_clusterizzato_dopo]
+
+4. Risultati:
+		- analogia notevole 1 - napoli ⟷ food
+		- analogia notevole 2 - kinshasa ⟷ crime
+		- analogia notevole 3 - athens ⟷ history
+		- analogia negativa 4 - culture ⟷ rome → parole vere ma generiche / poco mirate / comuni
+
+5. Pro e contro:
+		Il metodo permette indubbiamente di individuare elementi o concetti più specifici e 
+		caratteristici della città. Il metodo supervisionato non potrebbe raggiungere lo stesso 
+		livello di particolarità a meno che le liste preimpostate non vengano ingigantite
+		con le specifiche modalità che un topic ppuò assumere.
+		A discapito di questo però vi è però il problema di raccogliere termini generali,
+		non specifici della città anzi comuni a diverse di queste (environment → climate_change),
+		oppure ancora termini non del tutto attinenti all'ambito (es: food → autore_libro_cucina)
+
+---------------------------------------------------------------------------------
+
+	...
+
+---------------------------------------------------------------------------------
+
+Grafo (cristo jupyter)
+
+1. Idea:
+	L'idea è rappresentare i dati ottenuti attraverso un grafo i cui nodi rappresentano
+	le città e gli archi dei collegamenti più o meno forti tra il contenuto dei topic 
+	di queste.
+	La visualizzazione a grafo è ideale perchè permette di poter definire diversi attributi
+	sulle entità rappresentate. Le città si possono infatti raffigurare diversamente
+	per predominanza di un topic piuttosto che un altro, per coesione interna di questi e 
+	per diverso grado di collegamento il quale può essere più o meno forte. 
+	Viene realizzato un grafo per ogni singolo topic indagato.
+
+2. Dimensione del nodo: 
+	I nodi delle città, sono rappresentati da un pallino la cui dimensione è proporzionale
+	alla frequenza relativa delle parole legate a quel topic rispetto a tutte le parole 
+	raccolte in tutti i topic per quella città.
+
+3. Colore del nodo:
+	Il colore di un nodo città può essere più o meno intenso a seconda della coesione dei 
+	termini raccolti. Dati i vocaboli raccolti sotto un topic, e la loro divisione in 
+	cluster, lo score di coesione è dato dalla sommatoria, per ogni cluster, del prodotto
+	di coesione e frequenza relativa, così da favorire quei punti sia con elevata coesione
+	sia con una buona predominanza.
+
+4. Grado di collegamento:
+	Per quanto riguarda il collegamento tra due città in un certo ambito sono stati
+	testate diversi metodi. Il metodo scelto per l'applicazione si basa sul calcolo della
+	distanza tra i due vettori medi delle due città messe a confronto. Il vettore medio 
+	di una città viene calcolato ottenendo per ogni cluster il vettore medio delle parole 
+	che lo compongono e infine, mediando questi valori medi per ottenere un singolo vettore 
+	rappresentativo. 
+	Questo metodo si rivela piuttosto adeguato, esso permette di associare città in base alla 
+	similarità dei termini e non esclusivamente alla loro uguaglianza; inoltre, a visualizzazione
+	realizzata, permette di individuare cricche di città fortemente connesse tra loro e
+	maggiormente isolate rispetto alle altre (es: food → beijing, seoul, singapore)
+
+5. Risultati ottenuti per metodo 1 (supervised) e metodo 2 (unsupervised)
+	I risultati ottenuti per i due diversi metodi di estrazione delle parole sono simili
+	e coincidono a grandi linee, le differenze sono figlie dei pro e contro di questi. 	
+	.... to be continued
+
+---------------------------------------------------------------------------------
+
+	...
+
+---------------------------------------------------------------------------------
+
+Metodo 2 - Analogie (weat test jupyter)
+
+1. Idea: 
+		Dal momento che si vuole disambiguare l'accezione dei termini di un particolare
+		ambito in diverse città l'idea ricade ancora sullo sfruttare le analogie per 
+		ottenere set di termini relativi si allo stesso topic, ma da due punti di vista 
+		opposti.
+
+2. Algoritmo:
+		- Definizione dei due set di città messi a confronto: 
+			es: city_set1 = ['oslo', 'copenhagen', 'stockholm', 'brussels'] vs.
+					city_set2 = ['brasilia', 'sao_paulo', 'rio_janeiro']
+
+		- Definizione dei termini di disambiguazione:
+		  - Topic in questione (es: 'environment')
+			- Soggetto all'interno del topic (es: 'pollution')
+			- Punto di vista positivo (es: 'protection')
+			- Punto di vista cause (es: 'cause')
+
+		- Definizione delle analogie:
+			- analogia positiva: Topic : Subject = PV Positivo : x (es: environment : protection = pollution : x)
+				→ ['protect', 'enforcement', 'air_pollution', 'safeguard', 'environmental_protection',
+					'prevention', 'abatement', 'anti_pollution', 'nonpoint_source', 'naaqs']
+
+			- analogia negativa: Topic : Subject = PV Negativo : x (es: environment : cause = pollution : x)
+				→ ['air_pollution', 'nonpoint_source', 'culprit', 'pollutant', 'sulphur_dioxide', 
+					'particulate', 'traffic_related', 'sulfur_dioxide', 'smog', 'headache_dizziness']
+
+		- Chiamata a WEAT:
+			w.weat_m1(city_set1, city_set2, 
+								Topic='environment', Subject='pollution', Positive='protection', Negative='cause',
+								p_value=True, verbose=True)
+			↓
+			WEAT(	X = ['oslo', 'copenhagen', 'stockholm', 'brussels'], 
+						Y = ['brasilia', 'sao_paulo', 'rio_janeiro'],
+						A = ['protect', 'enforcement', 'air_pollution', 'safeguard', 'environmental_protection',
+								'prevention', 'abatement', 'anti_pollution', 'nonpoint_source', 'naaqs'],
+						B = ['air_pollution', 'nonpoint_source', 'culprit', 'pollutant', 'sulphur_dioxide', 
+								'particulate', 'traffic_related', 'sulfur_dioxide', 'smog', 'headache_dizziness'])
+
+		
+
