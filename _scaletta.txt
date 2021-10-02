@@ -65,7 +65,27 @@ Descrizione, analisi e preprocessing del corpus
 	Il corpus, per ogni sua categoria, oltre a presentare i testi in forma originale,
 	fornisce anche una trascrizione standardizzata, per la quale ogni vocabolo è ridotto
 	alla sua forma base, associando a questa un tag PoS che ne identifica l'analisi grammaticale.
+	Ritenendo che nell'analisi che si vuole condurre i tempi verbali ed i plurali non siano 
+	di interesse si preferisce utilizzare questo secondo tipo di formattazione dove i vocaboli 
+	sono 'standardizzati', semplificando poi ulteriormente alcuni tag composti, (es: 'tag1_tag2')
+	conservando solo il primo ruolo 'tag1'. 
 
+	In secondo luogo viene messo in atto un processo di lemmatizzazione: vocaboli che rappresentano 
+	pronomi e congiunzioni oppure simboli per loro natura non rappresentano temi, soggetti, fatti 
+	caratteristici di una città, vengono quindi scartati e mantenuti solamente termini che sono 
+	nomi (N), aggettivi (J), avverbi (R) o verbi (V).
+	Vengono comunque effettuati alcuni test alla cazzo di cane per vedere se ha senso:
+	[Screen che avevamo fatto]
+
+	Infine allo scopo di rappresentare nel modello termini composti, i quali possono essere 
+	sia vocaboli generali, che anche alcune città importanti ('new york', 'rio de janeiro'),
+	viene attuata una ricerca dei bigrammi. 
+	[Cosa fa ? vai mc !]
+	
+	Così facendo 'new york' viene trasformata in un singolo vocabolo 'new_york', mentre
+	'rio de janeiro' viene trasformato in 'rio_janeiro' (in questo caso il 'de' viene rimosso
+	precedentemente dalla lemmatizzazione, il metodo dei bigrammi riesce quindi successivamente
+	ad associare il termine 'rio' al termne 'janeiro')
 
 ---------------------------------------------------------------------------------
 
