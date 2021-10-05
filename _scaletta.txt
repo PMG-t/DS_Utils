@@ -62,6 +62,7 @@ ed in particolare al collegamento tra esse, evidenziando cosa hanno in comune.
 ---------------------------------------------------------------------------------
 
 Descrizione, analisi e preprocessing del corpus
+	
 	Il corpus, per ogni sua categoria, oltre a presentare i testi in forma originale,
 	fornisce anche una trascrizione standardizzata, per la quale ogni vocabolo è ridotto
 	alla sua forma base, associando a questa un tag PoS che ne identifica l'analisi grammaticale.
@@ -86,6 +87,30 @@ Descrizione, analisi e preprocessing del corpus
 	'rio de janeiro' viene trasformato in 'rio_janeiro' (in questo caso il 'de' viene rimosso
 	precedentemente dalla lemmatizzazione, il metodo dei bigrammi riesce quindi successivamente
 	ad associare il termine 'rio' al termne 'janeiro')
+
+---------------------------------------------------------------------------------
+
+Costruzione modello e comparazione
+
+	Il passo immediatamente successivo è la realizzazione di un modello di 
+	semantica distribiuita attraverso i dati preprocessati.
+	Per questo scopo, sono stati realizzati inizialmente diversi modelli tramite
+	la tecnica Word2Vec, per la quale sono stati presi in considerazione sia 
+	CBOW che SkipGram. 
+	
+	Dato lo scopo della nostra analisi si è pensato inizialmente che SkipGram
+	fosse la modalità migliore, in quanto partendo da un singolo termine (una città)
+	vogliamo ottenere diversi termini con annessa una probabilità di associazione 
+	a questa.
+
+	Ad ogni modo vengono comunque realizzati entrambi i modelli, quindi viene 
+	effettuato un test di verifica sulla precisione delle analogie, il quale ha 
+	poi decretato SkipGram come modello effettivamente migliore.
+	[Leonardo parlaci dei test]
+
+---------------------------------------------------------------------------------
+
+- Step 1: Obiettivo estrarre per una città delle parole relative alle sue caratteristiche/fama
 
 ---------------------------------------------------------------------------------
 
