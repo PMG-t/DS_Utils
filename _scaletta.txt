@@ -23,7 +23,7 @@ ed in particolare al collegamento tra esse, evidenziando cosa hanno in comune.
 - Individuazione del corpus
 - Descrizione, analisi e preprocessing del corpus → PoS, y_stop, lemmatization, bigrams
 - Costruzione modello e comparazione → cbow / skipgram, test analogie leonardo?
-- Step 1: Obiettivo estrarre per una città delle parole relative alle sue caratteristiche/fama
+- Step 1: Estrarre per una città delle parole relative alle sue caratteristiche/fama
   - L'idea è dividere le possibili caratteristiche in topic di appartenenza i quali 
     sono identificati da parole chiave
   - Metodo 1 - Supervised:
@@ -133,7 +133,7 @@ Step 1: Estrarre per una città delle parole relative alle sue caratteristiche
 
 Metodo 2 - Unsupervised (cristo jupyter)
 
-1. Idea: 
+	1. Idea: 
 		Data una città (es: san paolo brazil) e un topic generico (es: crime o pollution),
 		si può possono formulare delle analogie per cercare di ottenere i riferimenti della
 		specifica città in quello specifico ambito.
@@ -146,7 +146,7 @@ Metodo 2 - Unsupervised (cristo jupyter)
 					→ 'air_pollution', 'carbon_emission', 'emission', 'eutrophication', 'ozone_depletion', 
 					'ghg_emission', 'nitrogen_oxide', 'deforestation', 'sulfur_dioxide', 'agrochemical'
 
-2. Impostazione: 
+	2. Impostazione: 
 		definizione dei topic, e per ognuno di questi due o tre parole chiave che lo rappresentano:
 		{ 'crime': ['crime'],
 			'education': ['education','school'],
@@ -158,7 +158,7 @@ Metodo 2 - Unsupervised (cristo jupyter)
 			'culture': ['music','dance','art'],
 			'geo': ['vegetation','flora_fauna']	}
 
-3. Algoritmo:
+	3. Algoritmo:
 		- Raccolta parole:
 			Per ogni città, per ogni parola chiave di ciascun topic si ricavano tramite analogia 
 			le parole che dovrebbero rappresentare quella caratteristica in quella città.
@@ -185,13 +185,13 @@ Metodo 2 - Unsupervised (cristo jupyter)
 
 			[Fotina set_prima → set_clusterizzato_dopo]
 
-4. Risultati:
+	4. Risultati:
 		- analogia notevole 1 - napoli ⟷ food
 		- analogia notevole 2 - kinshasa ⟷ crime
 		- analogia notevole 3 - athens ⟷ history
 		- analogia negativa 4 - culture ⟷ rome → parole vere ma generiche / poco mirate / comuni
 
-5. Pro e contro:
+	5. Pro e contro:
 		Il metodo permette indubbiamente di individuare elementi o concetti più specifici e 
 		caratteristici della città. Il metodo supervisionato non potrebbe raggiungere lo stesso 
 		livello di particolarità a meno che le liste preimpostate non vengano ingigantite
@@ -208,44 +208,61 @@ Metodo 2 - Unsupervised (cristo jupyter)
 
 Grafo (cristo jupyter)
 
-1. Idea:
-	L'idea è rappresentare i dati ottenuti attraverso un grafo i cui nodi rappresentano
-	le città e gli archi dei collegamenti più o meno forti tra il contenuto dei topic 
-	di queste.
-	La visualizzazione a grafo è ideale perchè permette di poter definire diversi attributi
-	sulle entità rappresentate. Le città si possono infatti raffigurare diversamente
-	per predominanza di un topic piuttosto che un altro, per coesione interna di questi e 
-	per diverso grado di collegamento il quale può essere più o meno forte. 
-	Viene realizzato un grafo per ogni singolo topic indagato.
+	1. Idea:
+		L'idea è rappresentare i dati ottenuti attraverso un grafo i cui nodi rappresentano
+		le città e gli archi dei collegamenti più o meno forti tra il contenuto dei topic 
+		di queste.
+		La visualizzazione a grafo è ideale perchè permette di poter definire diversi attributi
+		sulle entità rappresentate. Le città si possono infatti raffigurare diversamente
+		per predominanza di un topic piuttosto che un altro, per coesione interna di questi e 
+		per diverso grado di collegamento il quale può essere più o meno forte. 
+		Viene realizzato un grafo per ogni singolo topic indagato.
 
-2. Dimensione del nodo: 
-	I nodi delle città, sono rappresentati da un pallino la cui dimensione è proporzionale
-	alla frequenza relativa delle parole legate a quel topic rispetto a tutte le parole 
-	raccolte in tutti i topic per quella città.
+	2. Dimensione del nodo: 
+		I nodi delle città, sono rappresentati da un pallino la cui dimensione è proporzionale
+		alla frequenza relativa delle parole legate a quel topic rispetto a tutte le parole 
+		raccolte in tutti i topic per quella città.
 
-3. Colore del nodo:
-	Il colore di un nodo città può essere più o meno intenso a seconda della coesione dei 
-	termini raccolti. Dati i vocaboli raccolti sotto un topic, e la loro divisione in 
-	cluster, lo score di coesione è dato dalla sommatoria, per ogni cluster, del prodotto
-	di coesione e frequenza relativa, così da favorire quei punti sia con elevata coesione
-	sia con una buona predominanza.
+	3. Colore del nodo:
+		Il colore di un nodo città può essere più o meno intenso a seconda della coesione dei 
+		termini raccolti. Dati i vocaboli raccolti sotto un topic, e la loro divisione in 
+		cluster, lo score di coesione è dato dalla sommatoria, per ogni cluster, del prodotto
+		di coesione e frequenza relativa, così da favorire quei punti sia con elevata coesione
+		sia con una buona predominanza.
 
-4. Grado di collegamento:
-	Per quanto riguarda il collegamento tra due città in un certo ambito sono stati
-	testate diversi metodi. Il metodo scelto per l'applicazione si basa sul calcolo della
-	distanza tra i due vettori medi delle due città messe a confronto. Il vettore medio 
-	di una città viene calcolato ottenendo per ogni cluster il vettore medio delle parole 
-	che lo compongono e infine, mediando questi valori medi per ottenere un singolo vettore 
-	rappresentativo. 
-	Questo metodo si rivela piuttosto adeguato, esso permette di associare città in base alla 
-	similarità dei termini e non esclusivamente alla loro uguaglianza; inoltre, a visualizzazione
-	realizzata, permette di individuare cricche di città fortemente connesse tra loro e
-	maggiormente isolate rispetto alle altre (es: food → beijing, seoul, singapore)
+	4. Grado di collegamento:
+		Per quanto riguarda il collegamento tra due città in un certo ambito sono stati
+		testate diversi metodi. Il metodo scelto per l'applicazione si basa sul calcolo della
+		distanza tra i due vettori medi delle due città messe a confronto. Il vettore medio 
+		di una città viene calcolato ottenendo per ogni cluster il vettore medio delle parole 
+		che lo compongono e infine, mediando questi valori medi per ottenere un singolo vettore 
+		rappresentativo. 
+		Questo metodo si rivela piuttosto adeguato, esso permette di associare città in base alla 
+		similarità dei termini e non esclusivamente alla loro uguaglianza; inoltre, a visualizzazione
+		realizzata, permette di individuare cricche di città fortemente connesse tra loro e
+		maggiormente isolate rispetto alle altre (es: food → beijing, seoul, singapore)
 
-5. Risultati ottenuti per metodo 1 (supervised) e metodo 2 (unsupervised)
-	I risultati ottenuti per i due diversi metodi di estrazione delle parole sono simili
-	e coincidono a grandi linee, le differenze sono figlie dei pro e contro di questi. 	
-	.... to be continued
+	5. Risultati ottenuti per metodo 1 (supervised) e metodo 2 (unsupervised)
+		I risultati ottenuti per i due diversi metodi di estrazione delle parole sono simili
+		e coincidono a grandi linee, le differenze sono figlie dei pro e contro di questi. 	
+		.... to be continued
+
+---------------------------------------------------------------------------------
+
+	...
+
+---------------------------------------------------------------------------------
+
+Step 3: Interpretazione risultati
+
+	I risultati ottenuti, rappresentati sia tramite word cloud che grafo permettono
+	già una buona esplorazione delle aree tematiche delle città e dei collegamenti
+	che si creano tra queste.
+	Tuttavia è possibile notare alcune situazioni la cui interpretazione risulta 
+	dubbia, poco solida o insapettata.
+
+	Per tentare di arginare questa cosa abbiamo scelto di utilizzare WEAT ...
+	... to be continued
 
 ---------------------------------------------------------------------------------
 
@@ -255,13 +272,13 @@ Grafo (cristo jupyter)
 
 Metodo 2 - Analogie (weat test jupyter)
 
-1. Idea: 
+	1. Idea: 
 		Dal momento che si vuole disambiguare l'accezione dei termini di un particolare
 		ambito in diverse città l'idea ricade ancora sullo sfruttare le analogie per 
 		ottenere set di termini relativi si allo stesso topic, ma da due punti di vista 
 		opposti.
 
-2. Algoritmo:
+	2. Algoritmo:
 		- Definizione dei due set di città messi a confronto: 
 			es: city_set1 = ['oslo', 'copenhagen', 'stockholm', 'brussels'] vs.
 					city_set2 = ['brasilia', 'sao_paulo', 'rio_janeiro']
