@@ -110,7 +110,20 @@ Costruzione modello e comparazione
 
 ---------------------------------------------------------------------------------
 
-- Step 1: Obiettivo estrarre per una città delle parole relative alle sue caratteristiche/fama
+Step 1: Estrarre per una città delle parole relative alle sue caratteristiche
+
+	Come primo obiettivo ci siamo preposti quello di estrarre termini che 
+	rappresentassero le città dal punto di vista dell'immaginario collettivo.
+
+	A questo fine si è scelto preventivamente di suddividere i diversi ambiti che 
+	un'intera idea di città contiene. Abbiamo quindi generato una lista di topic, 
+	per i quali, ad uno ad uno e per ogni città, si estrarranno termini legati si
+	al topic stesso che alla città in quel momento sotto indagine.
+
+	Lo scopo è quindi quello di ottenere per ogni città, una lista di termini che la
+	rappresentano in diversi ambiti (che già conosciamo), così da poterne osservare
+	le numerosità, similarità e coesione ed eventualmente distinguere poi le diverse 
+	accezioni che vengono attribute. 
 
 ---------------------------------------------------------------------------------
 
@@ -280,5 +293,8 @@ Metodo 2 - Analogie (weat test jupyter)
 						B = ['air_pollution', 'nonpoint_source', 'culprit', 'pollutant', 'sulphur_dioxide', 
 								'particulate', 'traffic_related', 'sulfur_dioxide', 'smog', 'headache_dizziness'])
 
-		
+---------------------------------------------------------------------------------
 
+	...
+
+---------------------------------------------------------------------------------
