@@ -124,7 +124,7 @@ def add_edge_att(gr, attname, triple):
 def html_to_js(title, html, js):
     with open(html, 'r') as htmlf:
         lines = [s.strip() for s in htmlf.read().split('\n') if s.strip()!='']
-    pezzotto = lines[13]
+    pezzotto = lines[13].replace('\'','').replace('\\',' ')
     id1 = lines[11].replace('<div class="bk-root" id="','')
     id1 = id1[:id1.index('"')]
     id2 = lines[11].replace('<div class="bk-root" id="'+id1+'" data-root-id="','')

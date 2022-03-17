@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+      <meta charset="utf-8">
+      <title>Bokeh Plot</title>
+
+        <script type="text/javascript" src="https://cdn.bokeh.org/bokeh/release/bokeh-2.3.3.min.js" integrity="sha384-dM3QQsP+wXdHg42wTqW85BjZQdLNNIXqlPw/BgKoExPmTG7ZLML4EGqLMfqHT6ON" crossorigin="anonymous"></script>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" integrity="sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU" crossorigin="anonymous">
+
+        <script type="text/javascript">
+            Bokeh.set_log_level("error");
+        </script>
+
+
+  </head>
+
+  <body>
+
+
+      <div class="container-fluid">
+          <div class="row">
+                  <div class="g-container col-10">
+                 <div class="main-root bk-root" id="3dbcb9f3-1d0d-44df-8358-8bfc518f821" data-root-id="11787"></div>
+            </div>
+            <div class="topic-chooser col-2" >
+
+              <div style="text-align: center; margin: 20% 10% 0 0;">
+                <h3>Supervised Method</h3>
+                <select id="topics-dropdown-super" onchange="changeTopicSRC_Super()">
+                  <option value="Crime">Crime</option>
+                  <option value="Food">Food</option>
+                  <option value="Education">Education</option>
+                  <option value="Environment">Environment</option>
+                  <option value="Pollution">Pollution</option>
+                  <option value="History">History</option>
+                  <option value="Music">Music</option>
+                  <option value="Vegetation">Vegetation</option>
+                  <option value="Nightlife">Nightlife</option>
+                </select>
+              </div>
+
+              <div style="text-align: center; margin: 20% 10% 0 0;">
+                  <h3>Unsupervised Method</h3>
+                  <select id="topics-dropdown-unsuper" onchange="changeTopicSRC_Unsuper()" style="margin-top: 2.5%;">
+                    <option value="Crime">Crime</option>
+                    <option value="Food">Food</option>
+                    <option value="Education">Education</option>
+                    <option value="Sociality">Sociality</option>
+                    <option value="Environment">Environment</option>
+                    <option value="Culture">Culture</option>
+                    <option value="History">History</option>
+                    <option value="Geo">Geo</option>
+                    <option value="Tourism">Tourism</option>
+                  </select>
+                </div>
+              </div>
+          </div>
+      </div>
+
+      <script src="super/Graph_crime_link_1.js"></script>
+      <script src="super/Graph_food_link_1.js"></script>
+      <script src="super/Graph_education_link_1.js"></script>
+      <script src="super/Graph_environment_link_1.js"></script>
+      <script src="super/Graph_pollution_link_1.js"></script>
+      <script src="super/Graph_history_link_1.js"></script>
+      <script src="super/Graph_music_link_1.js"></script>
+      <script src="super/Graph_vegetation_link_1.js"></script>
+      <script src="super/Graph_nightlife_link_1.js"></script>
+
+      <script src="unsuper/crime.js"></script>
+      <script src="unsuper/food.js"></script>
+      <script src="unsuper/culture.js"></script>
+      <script src="unsuper/education.js"></script>
+      <script src="unsuper/sociality.js"></script>
+      <script src="unsuper/environment.js"></script>
+      <script src="unsuper/history.js"></script>
+      <script src="unsuper/geo.js"></script>
+      <script src="unsuper/tourism.js"></script>
+      
+    
+
+
+    <script>
+
+    load_graph_crime_link_1();
+	var curr_link = 1
+
+    function changeTopicSRC_Super() {
+      var selected_topic = document.getElementById("topics-dropdown-super").value;
+
+      var main_root = document.getElementsByClassName("main-root")[0];
+      main_root.removeChild(main_root.childNodes[0]);
+      window["load_graph_"+selected_topic.toLowerCase()+"_link_1"](arguments);
+    }
+
+    function changeTopicSRC_Unsuper() {
+      var selected_topic = document.getElementById("topics-dropdown-unsuper").value;
+
+      var main_root = document.getElementsByClassName("main-root")[0];
+      main_root.removeChild(main_root.childNodes[0]);
+      window["load_"+selected_topic.toLowerCase()](arguments);
+    }
+
+    </script>
+
+  </body>
+</html>

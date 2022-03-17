@@ -6,54 +6,54 @@ Understanding society's perception of cities
 
 1. Overview and goal
 
-Tutte le città hanno caratteristiche che le definiscono: spesso la gente associa
-ad una città delle parole che la rappresentano, come la moda di Milano, il lusso
-di Dubai, l’emancipazione di Amsterdam. 
+	Tutte le città hanno caratteristiche che le definiscono: spesso la gente associa
+	ad una città delle parole che la rappresentano, come la moda di Milano, il lusso
+	di Dubai, l’emancipazione di Amsterdam. 
 
-Le percezioni possono spaziare su diversi ambiti e possono quindi essere più o 
-meno positive. Spesso convergono anche in stereotipi non necessariamente veritieri.
+	Le percezioni possono spaziare su diversi ambiti e possono quindi essere più o 
+	meno positive. Spesso convergono anche in stereotipi non necessariamente veritieri.
 
-Si vuole quindi analizzare come vengono percepite e dipinte le città dalla società,
-ed in particolare al collegamento tra esse, evidenziando cosa hanno in comune.
+	Si vuole quindi analizzare come vengono percepite e dipinte le città dalla società,
+	ed in particolare al collegamento tra esse, evidenziando cosa hanno in comune.
 
 --------------------------------------------------------------------------------
 
 2. Workflow
 
-- Individuazione del corpus
-- Descrizione, analisi e preprocessing del corpus → PoS, y_stop, lemmatization, bigrams
-- Costruzione modello e comparazione → cbow / skipgram, test analogie leonardo?
-- Step 1: Estrarre per una città delle parole relative alle sue caratteristiche/fama
-  - L'idea è dividere le possibili caratteristiche in topic di appartenenza i quali 
-    sono identificati da parole chiave
-  - Metodo 1 - Supervised:
-    - Identificazione topic + parole chiave
-    - Algoritmo
-    - Risultati
-    - Pro / Contro
-  - Metodo 2 - Unsupervised:
-    - Identificazione topic + parole chiave
-    - Algoritmo 
-    - Risultati 
-    - Pro / Contro
-- Step 2: Rappresentazione dei risultati 
-  - WordCloud 
-    - risultati ottenuti da metodo 1 e 2
-  - Grafo → Frequenza Topic, Coesione, Connessione
-    - risultati ottenuti da metodo 1 e 2
-- Step 3: Interpretazione risultati
-  - Utilizzo di weat 
-    - Motivazione → disambiguazione forti collegamenti e/o paragoni soggettivi
-    - Definizione casi di utilizzo → environment / food / culture / ... ?
-    - Metodo 1 - Topic 
-      - Algoritmo
-    - Metodo 2 - Analogie
-      - Algoritmo
-    - Run test e confronto 
-- Risultati
-  - Recap di quello che abbiamo ottenuto, stereotipi
-  - Limiti
-- Conclusioni / Sviluppi futuri
+	- Individuazione del corpus
+	- Descrizione, analisi e preprocessing del corpus → PoS, y_stop, lemmatization, bigrams
+	- Costruzione modello e comparazione → cbow / skipgram, test analogie leonardo?
+	- Step 1: Estrarre per una città delle parole relative alle sue caratteristiche/fama
+	- L'idea è dividere le possibili caratteristiche in topic di appartenenza i quali 
+		sono identificati da parole chiave
+	- Metodo 1 - Supervised:
+		- Identificazione topic + parole chiave
+		- Algoritmo
+		- Risultati
+		- Pro / Contro
+	- Metodo 2 - Unsupervised:
+		- Identificazione topic + parole chiave
+		- Algoritmo 
+		- Risultati 
+		- Pro / Contro
+	- Step 2: Rappresentazione dei risultati 
+	- WordCloud 
+		- risultati ottenuti da metodo 1 e 2
+	- Grafo → Frequenza Topic, Coesione, Connessione
+		- risultati ottenuti da metodo 1 e 2
+	- Step 3: Interpretazione risultati
+	- Utilizzo di weat 
+		- Motivazione → disambiguazione forti collegamenti e/o paragoni soggettivi
+		- Definizione casi di utilizzo → environment / food / culture / ... ?
+		- Metodo 1 - Topic 
+		- Algoritmo
+		- Metodo 2 - Analogie
+		- Algoritmo
+		- Run test e confronto 
+	- Risultati
+	- Recap di quello che abbiamo ottenuto, stereotipi
+	- Limiti
+	- Conclusioni / Sviluppi futuri
 
 ---------------------------------------------------------------------------------
 
@@ -134,7 +134,7 @@ Step 1: Estrarre per una città delle parole relative alle sue caratteristiche
 Metodo 2 - Unsupervised (cristo jupyter)
 
 	1. Idea: 
-		Data una città (es: san paolo brazil) e un topic generico (es: crime o pollution),
+		Data una città (es: san paolo) e un topic generico (es: crime o pollution),
 		si può possono formulare delle analogie per cercare di ottenere i riferimenti della
 		specifica città in quello specifico ambito.
 
@@ -246,10 +246,6 @@ Grafo (cristo jupyter)
 		I risultati ottenuti per i due diversi metodi di estrazione delle parole sono simili
 		e coincidono a grandi linee, le differenze sono figlie dei pro e contro di questi. 	
 		.... to be continued
-
----------------------------------------------------------------------------------
-
-	...
 
 ---------------------------------------------------------------------------------
 

@@ -120,35 +120,29 @@ class Utils:
     def read_inzip_files(self, archive, files='All'):
         files = archive.namelist() if files=='All' else files
         content = {}
-        for file in archive.namelist():
-            if file in files:
-                content[file] = self.read_inzip_file(archive, file)
+        for f in archive.namelist():
+            if f in files:
+                content[f] = self.read_inzip_file(archive, f)
         return content
 
     def read_inzip_file(self, archive, file):
         with archive.open(file) as f:
             return f.read()
 
-    def pickle_save(self, filename, object, subfolder='models'):
-        path = ''
-        if '\\' in filename:
-            path = filename
-        else:
-            if not os.path.exists(P._BASE_DIR + '\\' + subfolder + '\\'):
-                os.mkdir(P._BASE_DIR + '\\' + subfolder + '\\')
-            path = P._BASE_DIR + '\\' + subfolder + '\\' + filename
-        file = open(path + '.pkl', 'wb')
-        pickle.dump(object, file)
-        file.close()
+    def pickle_save(self, filename, obj, subfolder='models'):
+        path = P._BASE_DIR + filename + '.pkl'
+        f = open(path, 'wb')
+        pickle.dump(obj, f)
+        f.close()
         self.throw_msg('done', 'object saved in ' + path, 'pickle_save')
 
 
-    def pickle_load(self, filename, subfolder='models'):
-        path = filename if '\\' in filename else P._BASE_DIR + '\\' + subfolder + '\\' + filename
-        file = open(path + '.pkl', 'rb')
-        object = pickle.load(file)
-        file.close()
-        return object
+    def pickle_load(self, filename):
+        path = P._BASE_DIR + filename + '.pkl'
+        f = open(path + '.pkl', 'rb')
+        obj = pickle.load(f)
+        f.close()
+        return obj
 
     def throw_msg(self, category, message, from_function):
         category_colour = {
@@ -161,7 +155,7 @@ class Utils:
             full_message = category.upper() + ' → ' + _MODULE_NAME + ' in ' + from_function + '() → ' + message
             print(colored(full_message, category_colour[category.lower()]))
         else:
-            print(throw_msg('error', 'message category muste be in ' + ', '.join(list(category_colour.keys())), throw_msg.__name__))
+            print(self.throw_msg('error', 'message category muste be in ' + ', '.join(list(category_colour.keys())), self.throw_msg.__name__))
 
 #------------------------------------------------------------------------------#
 
@@ -421,6 +415,15 @@ def wsim(pos, neg=[], topn=10, thresh=0, low_thresh=0, comp=-1, model=_MODEL, yf
         sim1=[]
     return sim0
 
+def vsim(vector, topn=10, thresh=0, low_thresh=0, comp=-1, model=_MODEL, yfilter=None, fill=None):
+    sim = model.wv.similar_by_vector(vector, topn=topn)
+    if comp == 0:
+        return [s[0] for s in sim]
+    elif comp == 1:
+        return [s[1] for s in sim]  
+    else:
+        return sim
+
 def wanal(str_anal, topn=10, thresh=0, low_thresh=0, comp=-1, model=_MODEL, yfilter=None, fill=None):
     p1 = str_anal[:str_anal.index('=')]
     p2 = str_anal[str_anal.index('=')+1:]
@@ -433,6 +436,9 @@ def wdist(w1, w2, model=_MODEL):
     w1 = model.wv[w1] if type(w1) is str else w1
     w2 = model.wv[w2] if type(w2) is str else w2
     return 1-scipy.spatial.distance.cosine(w1, w2)
+
+def nwdist(ws1, ws2, model=_MODEL):
+    return model.wv.n_similarity(ws1,ws2)
 
 def wchoesion(words, gamma=1, model=_MODEL):
     sum = 0
@@ -542,10 +548,10 @@ def plot_dist_matrix(dist_matrix):
     plt.ylim([0,N])
     plt.show()
 
-def dm_cluster(dist_matrix, elements, eps='auto', min_samples=2):
-    if eps=='auto':
+def dm_cluster(dist_matrix, elements, eps='auto-75', min_samples=2):
+    if 'auto' in eps:
         flat = list(np.reshape(dist_matrix,-1))
-        eps = ((sum(flat)-math.sqrt(len(flat))) / (len(flat)-math.sqrt(len(flat)))) - np.std(flat)
+        eps = ((sum(flat)-math.sqrt(len(flat))) / (len(flat)-math.sqrt(len(flat)))) - (0 if eps=='auto-50' else np.std(flat))
         eps = eps if eps > 0 else 0.1
     clustering = DBSCAN(eps=eps, min_samples=2, metric='precomputed').fit(dist_matrix)
     out = {
@@ -914,13 +920,13 @@ def filter_country(model, df, country, min_pop, max_count, min_sim):
 
 
 def get_cities(model, min_pop=300000, max_count=15, min_sim=0.15, flat=False, show_coords=False):
-    df = pd.read_csv(_PATHS._BASE_DIR + 'wcities_coords.csv')
+    df = pd.read_csv(_PATHS._BASE_DIR + 'DS_Utils\\\\wcities_coords.csv')
     df['coords'] = list(zip(df.lat, df.lng))
     coords = df[['name', 'coords']].set_index('name').to_dict()['coords']
 
     cities = {c: filter_country(model, df, c, min_pop, max_count, min_sim) for c in set(df['country'])}
     cities = {k: v for k,v in cities.items() if v} #remove empty lists
-    
+
     if show_coords:
         cities = {k: {city: coords[city] for city in v} for k,v in cities.items()}
     if flat:
